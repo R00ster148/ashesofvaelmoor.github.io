@@ -104,7 +104,6 @@ h1,h2,h3,.label,.btn,.title{font-family:'Cinzel', serif;}
 
 /* ---------- Layout ---------- */
 .layout{
-  position:relative;
   display:grid;
   grid-template-columns:260px 1fr 320px;
   gap:18px;
@@ -353,47 +352,6 @@ h1,h2,h3,.label,.btn,.title{font-family:'Cinzel', serif;}
 .overlay-box p{margin:14px 0; color:var(--text);}
 .overlay-box .big-btn{margin-top:10px; display:inline-block;}
 
-/* ---------- Multiplayer ---------- */
-.mp-status-btn{position:relative;}
-.mp-status-btn.mp-live{color:var(--gold); border-color:var(--gold);}
-.mp-status-btn .mp-dot{display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px; background:var(--text-dim); vertical-align:middle;}
-.mp-status-btn.mp-live .mp-dot{background:#5cb86a; box-shadow:0 0 6px #5cb86a;}
-.mp-status-btn.mp-pending .mp-dot{background:var(--ember); box-shadow:0 0 6px var(--ember-glow); animation:mpPulse 1.2s infinite;}
-@keyframes mpPulse{0%,100%{opacity:1;} 50%{opacity:0.35;}}
-
-.mp-box{max-width:560px;}
-.mp-row{display:flex; gap:14px; flex-wrap:wrap; margin-top:16px;}
-.mp-field{margin-top:16px;}
-.mp-field label{display:block; font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;}
-.mp-field input{width:100%; background:var(--bg-deep); color:var(--text); border:1px solid var(--border); padding:10px 12px; font-family:'JetBrains Mono', monospace; font-size:15px; letter-spacing:0.06em;}
-.mp-field input:focus{outline:none; border-color:var(--ember);}
-.mp-code-display{text-align:center; margin:20px 0;}
-.mp-code-display .code{font-family:'JetBrains Mono', monospace; font-size:38px; letter-spacing:0.18em; color:var(--gold); background:var(--bg-deep); border:1px solid var(--gold); padding:14px 20px; display:inline-block; border-radius:3px;}
-.mp-code-hint{font-size:12.5px; color:var(--text-dim); font-style:italic; margin-top:10px;}
-.mp-status-line{font-size:14px; color:var(--text-dim); margin-top:14px;}
-.mp-status-line.mp-ok{color:#5cb86a;}
-.mp-back-link{display:inline-block; margin-top:16px; font-size:12.5px; color:var(--text-dim); cursor:pointer; text-decoration:underline;}
-.mp-back-link:hover{color:var(--ember);}
-.mp-tabs{display:flex; gap:10px; margin-top:18px;}
-.mp-tab{flex:1; text-align:center; padding:10px; cursor:pointer; background:var(--panel-light); border:1px solid var(--border); color:var(--text-dim); font-family:'Cinzel',serif; font-size:13px; letter-spacing:0.08em; text-transform:uppercase;}
-.mp-tab.active{color:var(--gold); border-color:var(--gold);}
-
-.turn-lock{position:absolute; inset:0; z-index:40; background:rgba(8,6,5,0.7); display:flex; align-items:center; justify-content:center; backdrop-filter:blur(1px);}
-.turn-lock.hidden{display:none;}
-.turn-lock-card{background:var(--panel); border:1px solid var(--gold); padding:22px 34px; text-align:center;
-  clip-path:polygon(0 10px,10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px));
-  box-shadow:0 0 60px -10px var(--ember-glow);}
-.turn-lock-card .tl-text{color:var(--parchment); font-size:17px; margin-top:6px; letter-spacing:0.02em;}
-
-.rival-scoreboard{position:fixed; top:18px; right:18px; z-index:30; background:var(--panel); border:1px solid var(--border);
-  padding:12px 16px; min-width:220px; box-shadow:0 4px 20px rgba(0,0,0,0.4);
-  clip-path:polygon(0 8px,8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px));}
-.rival-scoreboard.hidden{display:none;}
-.rs-title{font-family:'Cinzel',serif; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:var(--ember); margin-bottom:8px;}
-.rs-row{display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:4px 0; color:var(--text);}
-.rs-row.rs-rival{color:var(--text-dim); border-top:1px solid var(--border); margin-top:2px; padding-top:6px;}
-.rs-row span:first-child{font-weight:600;}
-
 /* ---------- Glossary ---------- */
 .glossary-box{max-width:640px; width:100%; max-height:80vh; display:flex; flex-direction:column;}
 .glossary-box h2{margin:0 0 4px; font-size:24px; letter-spacing:0.1em; color:var(--gold); border:none; padding:0; text-transform:none;}
@@ -573,7 +531,6 @@ h1,h2,h3,.label,.btn,.title{font-family:'Cinzel', serif;}
       <button class="banner-btn map-btn" id="mapBtn">Open the Map</button>
       <button class="banner-btn" id="courtBtn">The Court</button>
       <button class="banner-btn" id="glossaryBtn">Glossary &amp; Word Search</button>
-      <button class="banner-btn mp-status-btn" id="mpBtn">Multiplayer</button>
     </div>
   </div>
 
@@ -625,13 +582,6 @@ h1,h2,h3,.label,.btn,.title{font-family:'Cinzel', serif;}
       <h2>The Chronicle</h2>
       <div class="chronicle" id="chronicle"></div>
     </div>
-
-    <div class="turn-lock hidden" id="turnLockOverlay">
-      <div class="turn-lock-card">
-        <div class="eyebrow">Co-op</div>
-        <div class="tl-text">Waiting for your ally's turn...</div>
-      </div>
-    </div>
   </div>
 
   <div class="app-footer">
@@ -671,14 +621,6 @@ h1,h2,h3,.label,.btn,.title{font-family:'Cinzel', serif;}
 <div class="overlay hidden" id="courtOverlay">
   <div class="overlay-box court-box" id="courtBox"></div>
 </div>
-
-<div class="overlay hidden" id="mpOverlay">
-  <div class="overlay-box mp-box" id="mpBox"></div>
-</div>
-
-<div class="rival-scoreboard hidden" id="rivalScoreboard"></div>
-
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 /* =====================================================
    ASHES OF VAELMOOR — Core Data Layer
@@ -2898,8 +2840,7 @@ function freshState(){
     speedrun:false, runStartTime:null, finalElapsedMs:null,
     log:[], butterflies:[], flags:{}, priorityQueue:[], seen:new Set(),
     eventPool:shuffle(genericEventIds()),
-    currentEvent:null, phase:'event', ended:false, travel:null,
-    activePlayerId:'host'
+    currentEvent:null, phase:'event', ended:false, travel:null
   };
 }
 
@@ -2952,7 +2893,6 @@ function render(){
     renderActivities();
   }
   renderChronicle();
-  mpAfterRender();
 }
 
 function renderTerritories(){
@@ -3724,9 +3664,6 @@ function doAction(fn){
   if(endKey){ showEnding(endKey); return; }
 
   state.turn+=1;
-  if(MP.enabled && MP.mode==='coop'){
-    state.activePlayerId = state.activePlayerId==='host' ? 'guest' : 'host';
-  }
   checkRivalryTriggers(state);
 
   drawEvent();
@@ -4380,279 +4317,6 @@ function stopSpeedrunTimer(){
 function startGame(){
   showIntro();
 }
-
-/* =====================================================
-   MULTIPLAYER (PeerJS)
-   Two modes:
-   - "rival": each player runs their own fully independent campaign on the
-     same map layout; only a lightweight scoreboard snapshot is exchanged.
-   - "coop": a single shared campaign. Whoever's turn it is has full control
-     (identical to solo play) and their full state is broadcast to the other
-     player after every render; the other player sees a live mirror with a
-     "waiting for your ally" lock over the whole screen until it's their turn.
-   ===================================================== */
-const MP = {
-  enabled:false, mode:null, isHost:false, role:null,
-  peer:null, conn:null, roomCode:null, connected:false,
-  applyingRemote:false, myName:'', peerName:'',
-  lobbyView:'choose', pendingMode:'coop', hasSyncedOnce:false, rivalSnapshot:null
-};
-
-function mpGenRoomCode(){
-  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let s=''; for(let i=0;i<6;i++) s+=chars[Math.floor(Math.random()*chars.length)];
-  return s;
-}
-function mpSerializeState(s){
-  return JSON.stringify(s, (k,v)=> v instanceof Set ? {__isSet:true, values:[...v]} : v);
-}
-function mpDeserializeState(str){
-  return JSON.parse(str, (k,v)=> (v && typeof v==='object' && v.__isSet) ? new Set(v.values) : v);
-}
-function escapeHtml(str){
-  return String(str==null?'':str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function mpIsMyTurn(){
-  if(!MP.enabled || MP.mode!=='coop') return true;
-  return !state || state.activePlayerId===MP.role;
-}
-
-/* ---------- Connection lifecycle ---------- */
-function mpCreateRoom(mode){
-  if(typeof Peer==='undefined'){ alert('The multiplayer library failed to load — check your connection and try again.'); return; }
-  MP.mode=mode; MP.isHost=true; MP.role='host'; MP.enabled=true;
-  MP.roomCode=mpGenRoomCode();
-  MP.lobbyView='hosting';
-  renderMpLobby();
-  MP.peer=new Peer('avm-'+MP.roomCode);
-  MP.peer.on('open', ()=> renderMpLobby());
-  MP.peer.on('connection', conn=>{
-    MP.conn=conn;
-    conn.on('open', ()=>{
-      MP.connected=true;
-      conn.send({type:'hello', name:MP.myName||'Host', mode:MP.mode});
-      if(MP.mode==='coop' && state){ conn.send({type:'state', state:mpSerializeState(state)}); }
-      renderMpStatusBadge(); renderMpLobby(); renderRivalScoreboard();
-    });
-    conn.on('data', d=>mpHandleData(d));
-    conn.on('close', ()=>mpHandleDisconnect());
-  });
-  MP.peer.on('error', err=>{
-    console.error('MP error', err);
-    if(err.type==='unavailable-id'){ MP.roomCode=mpGenRoomCode(); mpCreateRoom(mode); return; }
-    alert('Multiplayer connection error: '+(err.type||'unknown'));
-    MP.lobbyView='choose'; renderMpLobby();
-  });
-}
-function mpJoinRoom(code){
-  if(typeof Peer==='undefined'){ alert('The multiplayer library failed to load — check your connection and try again.'); return; }
-  MP.isHost=false; MP.role='guest'; MP.enabled=true;
-  MP.roomCode=code.trim().toUpperCase();
-  MP.lobbyView='joining';
-  renderMpLobby();
-  MP.peer=new Peer();
-  MP.peer.on('open', ()=>{
-    const conn=MP.peer.connect('avm-'+code.trim().toUpperCase());
-    MP.conn=conn;
-    conn.on('open', ()=>{
-      MP.connected=true;
-      conn.send({type:'hello', name:MP.myName||'Guest'});
-      renderMpStatusBadge(); renderMpLobby();
-    });
-    conn.on('data', d=>mpHandleData(d));
-    conn.on('close', ()=>mpHandleDisconnect());
-    conn.on('error', ()=> alert('Could not reach that room — double check the code.'));
-  });
-  MP.peer.on('error', err=>{
-    console.error('MP error', err);
-    alert('Could not connect: '+(err.type||'unknown error'));
-    MP.lobbyView='choose'; renderMpLobby();
-  });
-}
-function mpHandleDisconnect(){
-  MP.connected=false;
-  if(MP.mode==='coop' && state){ state.activePlayerId=MP.role; } // don't leave either player stuck
-  renderMpStatusBadge(); renderMpLobby(); mpUpdateTurnLockOverlay(); renderRivalScoreboard();
-}
-function mpLeave(){
-  try{ if(MP.conn) MP.conn.close(); }catch(e){}
-  try{ if(MP.peer) MP.peer.destroy(); }catch(e){}
-  Object.assign(MP, {enabled:false, mode:null, isHost:false, role:null, peer:null, conn:null,
-    roomCode:null, connected:false, peerName:'', hasSyncedOnce:false, lobbyView:'choose', rivalSnapshot:null});
-  renderMpStatusBadge(); renderMpLobby(); mpUpdateTurnLockOverlay(); renderRivalScoreboard();
-}
-function mpHandleData(data){
-  if(!data || !data.type) return;
-  if(data.type==='hello'){
-    if(data.name) MP.peerName=data.name;
-    if(data.mode) MP.mode=data.mode;
-    renderMpStatusBadge(); renderMpLobby();
-    return;
-  }
-  if(data.type==='state'){
-    MP.applyingRemote=true;
-    try{ state=mpDeserializeState(data.state); } finally { MP.applyingRemote=false; }
-    if(!MP.hasSyncedOnce){
-      MP.hasSyncedOnce=true;
-      document.getElementById('overlay').classList.add('hidden');
-      setupSpeedrunTimer();
-    }
-    render();
-    return;
-  }
-  if(data.type==='snapshot'){
-    MP.rivalSnapshot=data.snapshot;
-    renderRivalScoreboard();
-    return;
-  }
-}
-
-/* ---------- Per-render hooks ---------- */
-function mpAfterRender(){
-  if(MP.enabled && MP.mode==='coop' && MP.conn && MP.connected && !MP.applyingRemote && mpIsMyTurn() && state){
-    try{ MP.conn.send({type:'state', state:mpSerializeState(state)}); }catch(e){}
-  }
-  if(MP.enabled && MP.mode==='rival' && MP.conn && MP.connected && state){
-    try{
-      MP.conn.send({type:'snapshot', snapshot:{
-        turn:state.turn, conquered:conqueredCount(state), ended:!!state.ended, name:MP.myName
-      }});
-    }catch(e){}
-  }
-  mpUpdateTurnLockOverlay();
-  renderRivalScoreboard();
-}
-function mpUpdateTurnLockOverlay(){
-  const el=document.getElementById('turnLockOverlay');
-  if(!el) return;
-  const show = MP.enabled && MP.mode==='coop' && MP.connected && state && !mpIsMyTurn();
-  el.classList.toggle('hidden', !show);
-  if(show) el.querySelector('.tl-text').textContent=`Waiting for ${MP.peerName||'your ally'}'s turn...`;
-}
-function renderRivalScoreboard(){
-  const el=document.getElementById('rivalScoreboard');
-  if(!el) return;
-  if(!(MP.enabled && MP.mode==='rival' && MP.connected && state)){ el.classList.add('hidden'); return; }
-  el.classList.remove('hidden');
-  const rs=MP.rivalSnapshot;
-  el.innerHTML=`
-    <div class="rs-title">Rival Realms</div>
-    <div class="rs-row"><span>${escapeHtml(MP.myName||'You')}</span><span class="mono">T${state.turn} · ${conqueredCount(state)} held</span></div>
-    <div class="rs-row rs-rival"><span>${escapeHtml(MP.peerName||'Rival')}</span><span class="mono">${rs?('T'+rs.turn+' · '+rs.conquered+' held'):'connecting…'}</span></div>
-  `;
-}
-function renderMpStatusBadge(){
-  const btn=document.getElementById('mpBtn');
-  if(!btn) return;
-  btn.classList.remove('mp-live','mp-pending');
-  if(MP.enabled && MP.connected){
-    btn.classList.add('mp-live');
-    btn.innerHTML=`<span class="mp-dot"></span>${MP.mode==='rival'?'Rival':'Co-op'} · ${escapeHtml(MP.peerName||'Connected')}`;
-  } else if(MP.enabled){
-    btn.classList.add('mp-pending');
-    btn.innerHTML=`<span class="mp-dot"></span>Waiting for player...`;
-  } else {
-    btn.innerHTML=`Multiplayer`;
-  }
-}
-
-/* ---------- Lobby UI ---------- */
-function mpOpenLobby(){
-  MP.lobbyView = MP.enabled ? (MP.connected?'connected':(MP.isHost?'hosting':(MP.role==='guest'?'joining':'choose'))) : 'choose';
-  renderMpLobby();
-  document.getElementById('mpOverlay').classList.remove('hidden');
-}
-function mpCloseLobby(){ document.getElementById('mpOverlay').classList.add('hidden'); }
-
-function renderMpLobby(){
-  const box=document.getElementById('mpBox');
-  if(!box) return;
-  const nameVal = MP.myName || '';
-  let html='';
-
-  if(MP.lobbyView==='choose'){
-    html=`
-      <div class="eyebrow">Two Rulers, One Vaelmoor</div>
-      <h2>Multiplayer</h2>
-      <p>Play a race against a rival on the same map, or share a single realm and split the turns between you.</p>
-      <div class="mp-field"><label>Your name</label><input type="text" id="mpNameInput" maxlength="18" placeholder="e.g. Rufus" value="${escapeHtml(nameVal)}"></div>
-      <div class="mp-row">
-        <button class="big-btn" id="mpGoHostBtn">Host a Room</button>
-        <button class="big-btn" id="mpGoJoinBtn">Join a Room</button>
-      </div>
-      <div class="mp-back-link" id="mpPlaySoloLink">Never mind, keep playing solo</div>
-    `;
-  } else if(MP.lobbyView==='host-setup'){
-    html=`
-      <div class="eyebrow">Hosting</div>
-      <h2>Choose a Mode</h2>
-      <div class="mode-select-row">
-        <button class="mode-btn" id="mpModeRivalBtn">
-          <span class="mode-btn-title">Rival Realms</span>
-          <span class="mode-btn-sub">Same map, two separate realms. Race each other — a live scoreboard tracks who's ahead.</span>
-        </button>
-        <button class="mode-btn" id="mpModeCoopBtn">
-          <span class="mode-btn-title">Co-op Realm</span>
-          <span class="mode-btn-sub">One shared realm. Turns alternate between you — whoever isn't up watches live and waits.</span>
-        </button>
-      </div>
-      <div class="mp-back-link" id="mpBackToChoose">&larr; Back</div>
-    `;
-  } else if(MP.lobbyView==='hosting'){
-    html=`
-      <div class="eyebrow">${MP.mode==='rival'?'Rival Realms':'Co-op Realm'}</div>
-      <h2>Room Created</h2>
-      <p>Send this code to your ally. Once they join${MP.mode==='coop'?' your current campaign will sync to them':' the scoreboard will start tracking both of you'}.</p>
-      <div class="mp-code-display"><span class="code">${MP.roomCode||'......'}</span></div>
-      <div class="mp-status-line">${MP.connected?`<span class="mp-status-line mp-ok">Connected to ${escapeHtml(MP.peerName||'ally')}!</span>`:'Waiting for someone to join...'}</div>
-      ${MP.connected?'<div class="mp-row"><button class="big-btn" id="mpContinueBtn">Continue Playing</button></div>':''}
-      <div class="mp-back-link" id="mpCancelBtn">Cancel and disconnect</div>
-    `;
-  } else if(MP.lobbyView==='join-setup'){
-    html=`
-      <div class="eyebrow">Joining</div>
-      <h2>Enter Room Code</h2>
-      <p>Ask your ally for their 6-character room code.</p>
-      <div class="mp-field"><label>Room code</label><input type="text" id="mpCodeInput" maxlength="6" placeholder="ABC123" style="text-transform:uppercase;"></div>
-      <div class="mp-row"><button class="big-btn" id="mpDoJoinBtn">Join</button></div>
-      <div class="mp-back-link" id="mpBackToChoose2">&larr; Back</div>
-    `;
-  } else if(MP.lobbyView==='joining'){
-    html=`
-      <div class="eyebrow">Joining</div>
-      <h2>Connecting...</h2>
-      <p>Reaching room <strong class="mono">${escapeHtml(MP.roomCode||'')}</strong>...</p>
-      ${MP.connected?`<div class="mp-status-line mp-ok">Connected to ${escapeHtml(MP.peerName||'host')}! Mode: ${MP.mode==='rival'?'Rival Realms':'Co-op Realm'}</div><div class="mp-row"><button class="big-btn" id="mpContinueBtn">Continue Playing</button></div>`:''}
-      <div class="mp-back-link" id="mpCancelBtn">Cancel and disconnect</div>
-    `;
-  } else if(MP.lobbyView==='connected'){
-    html=`
-      <div class="eyebrow">${MP.mode==='rival'?'Rival Realms':'Co-op Realm'}</div>
-      <h2>Connected to ${escapeHtml(MP.peerName||'your ally')}</h2>
-      <p>${MP.mode==='coop'?"You're sharing one realm. Action buttons are only live on whoever's turn it is — the other side sees everything happen live and waits their turn.":"You're each running your own realm on the same map. Watch the scoreboard in the corner to see who's ahead."}</p>
-      <div class="mp-row"><button class="big-btn" id="mpContinueBtn">Continue Playing</button></div>
-      <div class="mp-back-link" id="mpCancelBtn">Disconnect</div>
-    `;
-  }
-
-  box.innerHTML=html;
-
-  const byId=id=>document.getElementById(id);
-  if(byId('mpGoHostBtn')) byId('mpGoHostBtn').onclick=()=>{ MP.myName=byId('mpNameInput').value.trim(); MP.lobbyView='host-setup'; renderMpLobby(); };
-  if(byId('mpGoJoinBtn')) byId('mpGoJoinBtn').onclick=()=>{ MP.myName=byId('mpNameInput').value.trim(); MP.lobbyView='join-setup'; renderMpLobby(); };
-  if(byId('mpPlaySoloLink')) byId('mpPlaySoloLink').onclick=mpCloseLobby;
-  if(byId('mpModeRivalBtn')) byId('mpModeRivalBtn').onclick=()=>mpCreateRoom('rival');
-  if(byId('mpModeCoopBtn')) byId('mpModeCoopBtn').onclick=()=>mpCreateRoom('coop');
-  if(byId('mpBackToChoose')) byId('mpBackToChoose').onclick=()=>{ MP.lobbyView='choose'; renderMpLobby(); };
-  if(byId('mpBackToChoose2')) byId('mpBackToChoose2').onclick=()=>{ MP.lobbyView='choose'; renderMpLobby(); };
-  if(byId('mpDoJoinBtn')) byId('mpDoJoinBtn').onclick=()=>{ const code=byId('mpCodeInput').value; if(code && code.trim().length===6) mpJoinRoom(code); };
-  if(byId('mpCancelBtn')) byId('mpCancelBtn').onclick=mpLeave;
-  if(byId('mpContinueBtn')) byId('mpContinueBtn').onclick=()=>{ MP.lobbyView='connected'; mpCloseLobby(); };
-}
-
-document.getElementById('mpBtn').onclick=mpOpenLobby;
-document.getElementById('mpOverlay').addEventListener('click', e=>{ if(e.target.id==='mpOverlay') mpCloseLobby(); });
 
 setupGlossary();
 setupMapButton();
