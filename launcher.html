@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ashes of Vaelmoor Launcher</title>
+<meta name="description" content="Choose a build of Ashes of Vaelmoor to play.">
+
+<!--
+  HOW TO ADD A NEW VERSION
+  =========================
+  1. Drop your game file into the /versions/ folder of this repo.
+  2. Name it ashes-of-vaelmoor_20.html (the next number up from your
+     highest existing one). The plain "ashes-of-vaelmoor.html" is treated
+     as the oldest build and always sorts to the bottom.
+  3. Commit + push. This page reads the folder live from GitHub every time
+     it loads, so the new build just appears in the list, sorted above
+     older versions automatically. No manifest file to maintain.
+-->
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root{
+  --bg:#15110f;
+  --bg-deep:#0f0c0a;
+  --panel:#221c18;
+  --panel-light:#2b231e;
+  --border:#473a30;
+  --text:#ddd0bc;
+  --text-dim:#9a8a76;
+  --ember:#cf5b2e;
+  --ember-glow:rgba(207,91,46,0.35);
+  --gold:#c79a47;
+  --blood:#8a3232;
+  --parchment:#e8dcc0;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  background:radial-gradient(ellipse at 50% -10%, #241a14 0%, var(--bg-deep) 60%);
+  color:var(--text);
+  font-family:'EB Garamond', serif;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+h1,h2,.label,.btn,.title{ font-family:'Cinzel', serif; }
+.mono{ font-family:'JetBrains Mono', monospace; }
+
+.header{
+  padding:22px 28px 16px;
+  border-bottom:1px solid var(--border);
+  flex:0 0 auto;
+}
+.header h1{
+  margin:0;
+  font-size:22px;
+  letter-spacing:0.06em;
+  color:var(--gold);
+  text-shadow:0 0 18px var(--ember-glow);
+}
+.header .subtitle{
+  margin:6px 0 0;
+  font-size:13px;
+  color:var(--text-dim);
+  letter-spacing:0.03em;
+}
+
+.status-banner{
+  margin:12px 28px 0;
+  padding:9px 14px;
+  border-radius:4px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  font-size:12.5px;
+  color:var(--text-dim);
+  display:none;
+}
+.status-banner.show{ display:block; }
+.status-banner.error{ border-color:var(--blood); color:#e2a5a5; }
+
+.list{
+  flex:1 1 auto;
+  padding:16px 28px 24px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-width:720px;
+  width:100%;
+  margin:0 auto;
+}
+
+.version-row{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  transition:border-color 0.15s ease;
+}
+.version-row:hover{ border-color:var(--ember); }
+.version-row.latest{ border-color:var(--gold); box-shadow:0 0 10px rgba(199,154,71,0.18) inset; }
+
+.version-info{ display:flex; align-items:baseline; gap:10px; min-width:0; }
+.version-num{
+  font-family:'Cinzel',serif;
+  font-size:15px;
+  color:var(--text);
+  letter-spacing:0.03em;
+}
+.version-tag{
+  font-size:9.5px;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  color:var(--bg-deep);
+  background:var(--gold);
+  padding:2px 7px;
+  border-radius:8px;
+  flex:0 0 auto;
+}
+.version-tag.build{ background:var(--panel-light); color:var(--text-dim); border:1px solid var(--border); }
+
+.btn{
+  border:1px solid var(--border);
+  background:var(--panel-light);
+  color:var(--text);
+  padding:7px 18px;
+  border-radius:3px;
+  font-size:12.5px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  cursor:pointer;
+  text-decoration:none;
+  flex:0 0 auto;
+  transition:all 0.15s ease;
+  display:inline-block;
+}
+.btn:hover{ border-color:var(--ember); color:var(--parchment); }
+.btn.play{ border-color:var(--gold); color:var(--gold); }
+.btn.play:hover{ background:var(--gold); color:var(--bg-deep); }
+
+.footer{
+  flex:0 0 auto;
+  padding:10px 28px 16px;
+  border-top:1px solid var(--border);
+  font-size:11px;
+  color:var(--text-dim);
+  display:flex;
+  justify-content:space-between;
+  max-width:720px;
+  width:100%;
+  margin:0 auto;
+}
+.footer a{ color:var(--text-dim); text-decoration:none; }
+.footer a:hover{ color:var(--gold); }
+.footer-links{ display:flex; align-items:center; gap:8px; }
+.footer-sep{ color:var(--border); }
+
+.empty-state{
+  text-align:center;
+  padding:40px 20px;
+  color:var(--text-dim);
+  font-size:13px;
+}
+
+#emberCanvas{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+}
+.header, .status-banner, .list, .footer{
+  position:relative;
+  z-index:1;
+}
+</style>
+</head>
+<body>
+
+<canvas id="emberCanvas"></canvas>
+
+<div class="header">
+  <h1>Ashes of Vaelmoor</h1>
+  <div class="subtitle">Launcher &mdash; select a version to play</div>
+</div>
+
+<div class="status-banner" id="statusBanner"></div>
+
+<div class="list" id="versionList">
+  <div class="empty-state">Loading version list&hellip;</div>
+</div>
+
+<div class="footer">
+  <div class="footer-links">
+    <a href="https://discord.gg/qJKYaaUnnw" class="footer-link">Discord</a>
+    <span class="footer-sep">&middot;</span>
+    <a href="https://www.speedrun.com/Ashes_of_Vaelmoor" class="footer-link">Speedrun.com</a>
+  </div>
+  <a href="#" id="refreshLink">Refresh list</a>
+</div>
+
+<script>
+(function(){
+  // Ambient ember particle drift - purely decorative, matches the game's
+  // own color palette.
+  var canvas = document.getElementById('emberCanvas');
+  var ctx = canvas.getContext('2d');
+  function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  window.addEventListener('resize', resize);
+  resize();
+
+  var embers = [];
+  var maxEmbers = 35;
+  function spawnEmber(fromBottom){
+    return {
+      x: Math.random() * canvas.width,
+      y: fromBottom ? canvas.height + 10 : Math.random() * canvas.height,
+      r: 1 + Math.random() * 2.2,
+      speed: 0.25 + Math.random() * 0.6,
+      drift: (Math.random() - 0.5) * 0.35,
+      alpha: 0.25 + Math.random() * 0.45,
+      flicker: Math.random() * Math.PI * 2
+    };
+  }
+  for (var i = 0; i < maxEmbers; i++) embers.push(spawnEmber(false));
+
+  function tick(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var i = 0; i < embers.length; i++) {
+      var e = embers[i];
+      e.y -= e.speed;
+      e.x += e.drift;
+      e.flicker += 0.04;
+      if (e.y < -10) { embers[i] = spawnEmber(true); continue; }
+      var flick = 0.7 + 0.3 * Math.sin(e.flicker);
+      var grad = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.r * 3);
+      grad.addColorStop(0, 'rgba(207,91,46,' + (e.alpha * flick) + ')');
+      grad.addColorStop(1, 'rgba(207,91,46,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.r * 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+
+// ============================ CONFIG ============================
+// Adjust these if your repo owner/name/branch ever change.
+var OWNER = 'r00ster148';
+var REPO = 'ashesofvaelmoor.github.io';
+var BRANCH = 'main';      // change to 'master' if that's your default branch
+var FOLDER = 'versions';  // folder holding the version files
+
+// Matches: ashes-of-vaelmoor.html (the original, oldest build)
+//          ashes-of-vaelmoor_1.html, ashes-of-vaelmoor_2.html, ... ashes-of-vaelmoor_19.html
+var FILE_PATTERN = /^ashes-of-vaelmoor(?:_(\d+))?\.html$/i;
+// ==================================================================
+
+var listEl = document.getElementById('versionList');
+var bannerEl = document.getElementById('statusBanner');
+
+function showStatus(msg, isError) {
+  bannerEl.textContent = msg;
+  bannerEl.className = 'status-banner show' + (isError ? ' error' : '');
+}
+function hideStatus() {
+  bannerEl.className = 'status-banner';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+var builds = []; // { file, order, label }
+
+function render() {
+  if (builds.length === 0) {
+    listEl.innerHTML = '<div class="empty-state">No versions available.</div>';
+    return;
+  }
+
+  var html = '';
+  builds.forEach(function(b, idx) {
+    var isLatest = idx === 0;
+    html += '<div class="version-row' + (isLatest ? ' latest' : '') + '">';
+    html += '  <div class="version-info">';
+    html += '    <span class="version-num">' + escapeHtml(b.label) + '</span>';
+    if (isLatest) html += '    <span class="version-tag">Latest</span>';
+    html += '  </div>';
+    html += '  <a class="btn play" href="./' + FOLDER + '/' + encodeURIComponent(b.file) + '">Play</a>';
+    html += '</div>';
+  });
+  listEl.innerHTML = html;
+}
+
+function loadVersions() {
+  hideStatus();
+  listEl.innerHTML = '<div class="empty-state">Loading version list&hellip;</div>';
+
+  var apiUrl = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/' + FOLDER + '?ref=' + BRANCH;
+
+  fetch(apiUrl, { headers: { 'Accept': 'application/vnd.github+json' } })
+    .then(function(res) {
+      if (!res.ok) {
+        if (res.status === 404) {
+          throw new Error('No "' + FOLDER + '/" folder found yet in the repo.');
+        }
+        if (res.status === 403) {
+          throw new Error('GitHub API rate limit hit - wait a bit and try again.');
+        }
+        throw new Error('GitHub API returned ' + res.status + '.');
+      }
+      return res.json();
+    })
+    .then(function(files) {
+      builds = files
+        .filter(function(f) { return f.type === 'file'; })
+        .map(function(f) {
+          var m = f.name.match(FILE_PATTERN);
+          if (!m) return null;
+          var num = m[1] ? parseInt(m[1], 10) : 0; // no number = the original, oldest build
+          var label = m[1] ? ('v' + m[1]) : 'Original';
+          return { file: f.name, order: num, label: label };
+        })
+        .filter(Boolean)
+        .sort(function(a, b) { return b.order - a.order; }); // highest number first (newest)
+
+      if (builds.length === 0) {
+        listEl.innerHTML = '<div class="empty-state">No builds found in /' + FOLDER + '/.</div>';
+        return;
+      }
+      render();
+    })
+    .catch(function(err) {
+      showStatus('Could not load the version list: ' + err.message, true);
+      listEl.innerHTML = '<div class="empty-state">Could not load version list.</div>';
+    });
+}
+
+document.getElementById('refreshLink').addEventListener('click', function(e) {
+  e.preventDefault();
+  loadVersions();
+});
+
+loadVersions();
+</script>
+</body>
+</html>
