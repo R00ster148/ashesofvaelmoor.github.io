@@ -1,0 +1,2881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ashes of Vaelmoor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root{
+  --bg:#15110f;
+  --bg-deep:#0f0c0a;
+  --panel:#221c18;
+  --panel-light:#2b231e;
+  --border:#473a30;
+  --text:#ddd0bc;
+  --text-dim:#9a8a76;
+  --ember:#cf5b2e;
+  --ember-glow:rgba(207,91,46,0.35);
+  --gold:#c79a47;
+  --blood:#8a3232;
+  --corrupt:#7a4ea3;
+  --corrupt-deep:#3a2150;
+  --parchment:#e8dcc0;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse at top, rgba(207,91,46,0.06), transparent 60%),
+    var(--bg-deep);
+  color:var(--text);
+  font-family:'EB Garamond', serif;
+  font-size:17px;
+  line-height:1.5;
+  min-height:100vh;
+}
+h1,h2,h3,.label,.btn,.title{font-family:'Cinzel', serif;}
+.mono{font-family:'JetBrains Mono', monospace;}
+
+.app{max-width:1180px; margin:0 auto; padding:18px 18px 60px;}
+
+/* ---------- Banner ---------- */
+.banner{text-align:center; padding:22px 10px 16px; border-bottom:1px solid var(--border); margin-bottom:22px; position:relative;}
+.banner h1{margin:0; font-size:clamp(28px,5vw,46px); letter-spacing:0.12em; color:var(--text); text-shadow:0 0 18px var(--ember-glow);}
+.banner .sub{margin-top:8px; color:var(--text-dim); font-size:14px; letter-spacing:0.06em; text-transform:uppercase;}
+.banner .sub .turn{color:var(--gold);}
+.banner-actions{display:flex; justify-content:center; gap:10px; margin-top:14px; flex-wrap:wrap;}
+.banner-btn{
+  font-family:'Cinzel', serif; font-size:12px; letter-spacing:0.12em; text-transform:uppercase;
+  background:var(--panel); border:1px solid var(--border); color:var(--gold);
+  padding:8px 16px; cursor:pointer;
+  clip-path:polygon(0 6px,6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px));
+  transition:border-color .15s, color .15s;
+}
+.banner-btn:hover{border-color:var(--ember); color:#fff;}
+.banner-btn.map-btn{color:var(--ember);}
+
+/* ---------- Layout ---------- */
+.layout{
+  display:grid;
+  grid-template-columns:260px 1fr 300px;
+  gap:18px;
+  align-items:stretch;
+  grid-template-areas:
+    "ledger  event  realm"
+    "companions  event  realm"
+    "companions  actions realm"
+    "activities activities realm"
+    "chronicle chronicle chronicle";
+}
+@media (max-width:980px){
+  .layout{
+    grid-template-columns:1fr 1fr;
+    grid-template-areas:
+      "ledger  realm"
+      "companions  realm"
+      "event   event"
+      "actions actions"
+      "activities activities"
+      "chronicle chronicle";
+  }
+}
+@media (max-width:640px){
+  .layout{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "ledger" "realm" "companions" "event" "actions" "activities" "chronicle";
+  }
+}
+.area-ledger{grid-area:ledger;}
+.area-companions{grid-area:companions;}
+.area-realm{grid-area:realm;}
+.area-event{grid-area:event;}
+.area-actions{grid-area:actions;}
+.area-activities{grid-area:activities;}
+.area-chronicle{grid-area:chronicle;}
+
+.panel{
+  background:var(--panel); border:1px solid var(--border);
+  clip-path:polygon(0 10px,10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px));
+  padding:16px 18px;
+}
+.panel h2{margin:0 0 12px; font-size:14px; letter-spacing:0.18em; text-transform:uppercase; color:var(--gold); border-bottom:1px solid var(--border); padding-bottom:8px;}
+
+/* ---------- Ledger ---------- */
+.stat-row{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; font-size:14px;}
+.stat-row .stat-name{color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase; font-size:12px;}
+.stat-row .stat-val{font-size:16px;}
+.bar-track{height:7px; background:var(--bg-deep); border:1px solid var(--border); margin:4px 0 12px; overflow:hidden; position:relative;}
+.bar-fill{height:100%; transition:width .4s ease;}
+.bar-fill.faith{background:linear-gradient(90deg,#7a6a3a,var(--gold));}
+.bar-fill.corruption{background:linear-gradient(90deg,var(--corrupt-deep),var(--corrupt),var(--blood)); background-size:200% 100%; animation:corruptShift 6s linear infinite;}
+@keyframes corruptShift{0%{background-position:0% 0;} 100%{background-position:200% 0;}}
+
+/* ---------- Companions panel ---------- */
+.companion-card{
+  display:flex; gap:10px; align-items:flex-start;
+  background:var(--panel-light); border:1px solid var(--border);
+  clip-path:polygon(0 6px,6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px));
+  padding:9px 11px; margin-bottom:9px; cursor:pointer; transition:border-color .15s;
+}
+.companion-card:last-child{margin-bottom:0;}
+.companion-card:hover{border-color:var(--char-color, var(--ember));}
+.companion-card.departed{opacity:0.45; cursor:default;}
+.char-badge{
+  width:30px; height:30px; flex:0 0 auto; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Cinzel',serif; font-size:13px; color:var(--bg-deep); font-weight:700;
+  background:var(--char-color, var(--text-dim));
+  box-shadow:0 0 10px -2px var(--char-color, transparent);
+}
+.companion-meta{flex:1; min-width:0;}
+.companion-name{font-size:12.5px; letter-spacing:0.04em; color:var(--text);}
+.companion-trust-label{font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; color:var(--char-color, var(--text-dim));}
+.companion-trust-track{height:4px; background:var(--bg-deep); border:1px solid var(--border); margin-top:4px; overflow:hidden;}
+.companion-trust-fill{height:100%; background:var(--char-color, var(--gold)); transition:width .4s ease;}
+
+/* ---------- Territories / Realm ---------- */
+#territories{max-height:520px; overflow-y:auto; padding-right:4px;}
+.campaign-progress{margin-bottom:14px;}
+.campaign-progress-label{display:flex; justify-content:space-between; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:4px;}
+.bar-fill.campaign{background:linear-gradient(90deg,#7a6a3a,var(--gold));}
+.frontier-label{font-family:'Cinzel',serif; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ember); margin-bottom:8px;}
+.region-note{font-size:11.5px; color:var(--text-dim); font-style:italic; margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);}
+.territory-card.final-ready{border-color:var(--corrupt); box-shadow:0 0 10px rgba(122,78,163,0.25) inset;}
+.territory-card.final-ready .t-name{color:var(--corrupt);}
+.territory-card{
+  background:var(--panel-light); border:1px solid var(--border);
+  clip-path:polygon(0 6px,6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px));
+  padding:10px 12px; margin-bottom:10px; font-size:13px;
+}
+.territory-card:last-child{margin-bottom:0;}
+.t-name-row{display:flex; align-items:center; gap:8px;}
+.t-icon{width:18px; height:18px; flex:0 0 auto; color:var(--text-dim);}
+.territory-card.conquered .t-icon{color:var(--gold);}
+.t-name{font-family:'Cinzel', serif; font-size:13px; letter-spacing:0.04em; color:var(--text);}
+.territory-card.conquered{border-color:var(--gold); box-shadow:0 0 10px rgba(199,154,71,0.18) inset;}
+.territory-card.conquered .t-name{color:var(--gold);}
+.territory-card.locked{opacity:0.55;}
+.t-meta{display:flex; justify-content:space-between; color:var(--text-dim); font-size:11px; margin:3px 0 5px; text-transform:uppercase; letter-spacing:0.06em;}
+.t-desc{color:var(--text-dim); font-size:12px; font-style:italic;}
+
+/* ---------- Speaker badge (events) ---------- */
+.speaker-row{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+.speaker-badge{
+  width:34px; height:34px; flex:0 0 auto; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Cinzel',serif; font-size:15px; font-weight:700; color:var(--bg-deep);
+  background:var(--char-color, var(--text-dim));
+  box-shadow:0 0 10px -2px var(--char-color, transparent);
+}
+.speaker-meta{display:flex; flex-direction:column; line-height:1.2;}
+.speaker-name{font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--char-color, var(--ember));}
+.speaker-role{font-size:11px; color:var(--text-dim); font-style:italic;}
+
+/* ---------- Event / choices ---------- */
+.event-card{border-left:3px solid var(--ember); box-shadow:0 0 22px -6px var(--ember-glow); position:relative;}
+.event-card h3{margin:0 0 10px; font-size:20px; letter-spacing:0.05em; color:var(--text);}
+.event-text{margin:0 0 16px; color:var(--text);}
+.choice-list{display:flex; flex-direction:column; gap:8px;}
+.choice-btn, .action-btn, .big-btn{
+  font-family:'EB Garamond', serif; font-size:15px; text-align:left;
+  background:var(--panel-light); border:1px solid var(--border); color:var(--text);
+  padding:10px 14px; cursor:pointer;
+  clip-path:polygon(0 6px,6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px));
+  transition:border-color .15s, color .15s, transform .1s;
+}
+.choice-btn:hover, .action-btn:hover:not(:disabled), .big-btn:hover{border-color:var(--ember); color:#fff;}
+.choice-btn:active, .action-btn:active, .big-btn:active{transform:scale(0.99);}
+.action-btn:disabled{opacity:0.4; cursor:not-allowed;}
+.result-text{margin-top:14px; padding-top:14px; border-top:1px dashed var(--border); color:var(--text); font-style:italic;}
+
+/* ---------- Actions ---------- */
+.actions-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+@media (max-width:480px){.actions-grid{grid-template-columns:1fr;}}
+.action-btn small{display:block; color:var(--text-dim); font-size:11px; margin-top:3px; text-transform:none; letter-spacing:0;}
+.target-row{display:flex; gap:8px; margin-top:4px; flex-wrap:wrap;}
+.target-row select{flex:1; background:var(--bg-deep); color:var(--text); border:1px solid var(--border); padding:8px; font-family:'EB Garamond', serif; font-size:14px;}
+.target-row .action-btn{flex:0 0 auto;}
+.gate-note{font-size:12px; color:var(--text-dim); font-style:italic; margin-top:6px;}
+
+/* ---------- Activities ---------- */
+.activity-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+@media (max-width:480px){.activity-grid{grid-template-columns:1fr;}}
+.activity-card{
+  background:var(--panel-light); border:1px solid var(--border);
+  clip-path:polygon(0 6px,6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px));
+  padding:10px 12px; cursor:pointer; transition:border-color .15s; text-align:left; font-family:'EB Garamond', serif; color:var(--text);
+}
+.activity-card:hover{border-color:var(--ember);}
+.activity-card .activity-title{font-family:'Cinzel', serif; font-size:13px; letter-spacing:0.04em; display:flex; align-items:center; gap:6px; margin-bottom:4px;}
+.activity-card .activity-icon{width:15px; height:15px; color:var(--gold);}
+.activity-card .activity-desc{font-size:12px; color:var(--text-dim); font-style:italic;}
+
+/* ---------- Chronicle ---------- */
+.chronicle{max-height:230px; overflow-y:auto; font-size:13px; color:var(--text-dim);}
+.chronicle .entry{padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.04);}
+.chronicle .entry:last-child{border-bottom:none;}
+.chronicle .entry .turn-mark{color:var(--gold); font-family:'JetBrains Mono', monospace; margin-right:6px;}
+
+/* ---------- Overlay (generic) ---------- */
+.overlay{position:fixed; inset:0; background:rgba(8,6,5,0.92); display:flex; align-items:center; justify-content:center; z-index:50; padding:24px; overflow-y:auto;}
+.overlay.hidden{display:none;}
+.overlay-box{max-width:600px; width:100%; background:var(--panel); border:1px solid var(--border);
+  clip-path:polygon(0 14px,14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px));
+  padding:28px 30px; box-shadow:0 0 60px -10px var(--ember-glow); margin:auto;}
+.overlay-box h2{margin:0 0 4px; font-size:26px; letter-spacing:0.1em; color:var(--gold); border:none; padding:0; text-transform:none;}
+.overlay-box .eyebrow{font-size:12px; letter-spacing:0.2em; text-transform:uppercase; color:var(--ember); margin-bottom:6px;}
+.overlay-box p{margin:14px 0; color:var(--text);}
+.overlay-box .big-btn{margin-top:10px; display:inline-block;}
+
+/* ---------- Glossary ---------- */
+.glossary-box{max-width:640px; width:100%; max-height:80vh; display:flex; flex-direction:column;}
+.glossary-box h2{margin:0 0 4px; font-size:24px; letter-spacing:0.1em; color:var(--gold); border:none; padding:0; text-transform:none;}
+.glossary-search{width:100%; margin:14px 0 12px; background:var(--bg-deep); color:var(--text); border:1px solid var(--border); padding:10px 12px; font-family:'EB Garamond', serif; font-size:15px;}
+.glossary-search:focus{outline:none; border-color:var(--ember);}
+.glossary-list{overflow-y:auto; flex:1; padding-right:4px;}
+.glossary-item{margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05);}
+.glossary-item:last-child{border-bottom:none;}
+.glossary-term{font-family:'Cinzel', serif; font-size:14px; letter-spacing:0.06em; color:var(--ember); margin-bottom:3px;}
+.glossary-def{font-size:14px; color:var(--text);}
+.glossary-empty{color:var(--text-dim); font-style:italic; text-align:center; padding:20px 0;}
+.glossary-close-row{text-align:right; margin-top:14px;}
+
+/* ---------- Travel sequence ---------- */
+.travel-box{max-width:640px; width:100%;}
+.travel-box h2{margin:0 0 4px; font-size:22px; letter-spacing:0.08em; color:var(--gold); border:none; padding:0; text-transform:none;}
+.travel-meta{font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ember); margin-bottom:14px; display:flex; align-items:center; gap:8px;}
+.travel-meta .t-icon{width:16px; height:16px;}
+.travel-progress-track{height:10px; background:var(--bg-deep); border:1px solid var(--border); margin:10px 0 18px; overflow:hidden; position:relative;}
+.travel-progress-fill{height:100%; background:linear-gradient(90deg,#7a4a2a,var(--ember),var(--gold)); background-size:200% 100%; animation:corruptShift 4s linear infinite; transition:width .5s ease;}
+.travel-days-label{display:flex; justify-content:space-between; font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em; margin-top:-12px; margin-bottom:14px;}
+.travel-text{margin:0 0 16px; color:var(--text);}
+.travel-result{margin:14px 0; padding:12px 14px; background:var(--panel-light); border-left:3px solid var(--ember); font-style:italic; font-size:14px;}
+.travel-npc-banner{
+  display:flex; align-items:center; gap:10px; margin-bottom:12px; padding:8px 10px;
+  background:var(--panel-light); border:1px solid var(--corrupt);
+}
+
+/* ---------- Companion talk overlay ---------- */
+.talk-box{max-width:600px; width:100%;}
+.talk-header{display:flex; gap:12px; align-items:center; margin-bottom:6px;}
+.talk-badge{width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:19px; font-weight:700; color:var(--bg-deep); background:var(--char-color);}
+.talk-name{font-size:20px; color:var(--char-color); letter-spacing:0.06em;}
+.talk-role{font-size:12px; color:var(--text-dim); font-style:italic;}
+.talk-trust-row{display:flex; align-items:center; gap:8px; margin:10px 0 16px; font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em;}
+.talk-trust-track{flex:1; height:5px; background:var(--bg-deep); border:1px solid var(--border); overflow:hidden;}
+.talk-trust-fill{height:100%; background:var(--char-color);}
+.talk-band-text{font-style:italic; color:var(--text); margin-bottom:16px;}
+
+/* ---------- Map overlay ---------- */
+.map-box{max-width:920px; width:96vw;}
+.map-box h2{margin:0 0 4px; font-size:24px; letter-spacing:0.08em; color:var(--gold); border:none; padding:0; text-transform:none;}
+.map-tabs{display:flex; gap:8px; margin:12px 0 14px; flex-wrap:wrap; align-items:center; justify-content:space-between;}
+.map-tabs-left{display:flex; gap:8px;}
+.map-tab{
+  font-family:'Cinzel', serif; font-size:11px; letter-spacing:0.1em; text-transform:uppercase;
+  background:var(--panel-light); border:1px solid var(--border); color:var(--text-dim);
+  padding:7px 14px; cursor:pointer; clip-path:polygon(0 5px,5px 0,calc(100% - 5px) 0,100% 5px,100% calc(100% - 5px),calc(100% - 5px) 100%,5px 100%,0 calc(100% - 5px));
+}
+.map-tab.active{color:var(--gold); border-color:var(--gold);}
+.map-zoom-controls{display:flex; gap:6px;}
+.map-zoom-btn{
+  width:30px; height:30px; font-family:'Cinzel',serif; font-size:15px; line-height:1;
+  background:var(--panel-light); border:1px solid var(--border); color:var(--text);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.map-zoom-btn:hover{border-color:var(--ember); color:#fff;}
+.map-viewport{
+  position:relative; width:100%; height:560px; overflow:hidden;
+  border:1px solid var(--border); background:#1c1610; box-shadow:0 0 30px rgba(0,0,0,0.5) inset;
+  cursor:grab; touch-action:none;
+}
+.map-viewport.dragging{cursor:grabbing;}
+.map-bg{fill:#1c1610;}
+.vaelmoor-map{position:absolute; top:0; left:0; width:1100px; height:1000px; transform-origin:0 0; will-change:transform;}
+.map-pan-hint{font-size:11px; color:var(--text-dim); text-align:center; margin-top:8px; font-style:italic;}
+.map-border-outer{stroke:var(--gold); stroke-width:1.5; opacity:0.55;}
+.map-border-inner{stroke:var(--gold); stroke-width:0.75; opacity:0.3;}
+.map-corner-flourish{color:var(--gold); opacity:0.5;}
+.map-bg-decor{color:var(--text-dim);}
+.region-label{font-family:'Cinzel', serif; font-size:15px; letter-spacing:0.12em; text-transform:uppercase; fill:var(--text-dim); opacity:0.4; pointer-events:none;}
+.route-line{stroke:var(--text-dim); stroke-width:1; stroke-dasharray:4 4; opacity:0.4;}
+.route-line.conquered{stroke:var(--gold); stroke-dasharray:none; opacity:0.75; filter:drop-shadow(0 0 2px rgba(199,154,71,0.4));}
+.route-line.locked{opacity:0.12;}
+.map-node{cursor:pointer; color:var(--text-dim);}
+.map-node .node-ring-halo{fill:none; stroke:none;}
+.map-node .node-ring{fill:var(--panel-light); stroke:var(--text-dim); stroke-width:1.4; opacity:0.9;}
+.map-node:hover .node-ring{stroke:var(--ember);}
+.map-node:hover .node-ring-halo{stroke:var(--ember); stroke-width:1; opacity:0.3;}
+.map-node.conquered{color:var(--gold);}
+.map-node.conquered .node-ring{stroke:var(--gold); fill:rgba(199,154,71,0.14);}
+.map-node.conquered .node-ring-halo{stroke:var(--gold); stroke-width:1; opacity:0.25;}
+.map-node.locked{color:var(--text-dim); opacity:0.5; cursor:default;}
+.map-node.locked .node-ring{stroke-dasharray:3 3;}
+.map-node.final .node-ring{stroke:var(--corrupt);}
+.map-node.final .node-ring-halo{stroke:var(--corrupt); stroke-width:1.5; opacity:0.35;}
+.map-node.final.conquered .node-ring{stroke:var(--gold);}
+.hold-node{color:var(--ember);}
+.hold-ring{fill:rgba(207,91,46,0.1); stroke:var(--ember); stroke-width:1.6; filter:drop-shadow(0 0 4px var(--ember-glow));}
+.site-ring{stroke:var(--gold) !important;}
+.lock-overlay{color:var(--bg-deep); fill:var(--text-dim);}
+.mystery-node{opacity:0.7;}
+.mystery-marker{color:var(--text-dim);}
+.map-label{font-family:'EB Garamond', serif; font-size:13px; fill:var(--text-dim); pointer-events:none;}
+.map-label.hold-label{fill:var(--ember); font-family:'Cinzel',serif; font-size:12px; letter-spacing:0.04em;}
+.map-label.conquered-label{fill:var(--gold);}
+.map-label.site-label{fill:var(--gold); font-style:italic;}
+.map-label.npc-label{fill:var(--text);}
+.map-compass{color:var(--gold); opacity:0.65;}
+.compass-ring{fill:none; stroke:currentColor; stroke-width:1;}
+.compass-line{stroke:currentColor; stroke-width:0.75; opacity:0.6;}
+.compass-needle{fill:var(--ember);}
+.compass-label{font-family:'Cinzel',serif; font-size:9px; fill:currentColor; text-anchor:middle;}
+.map-legend{display:flex; gap:16px; flex-wrap:wrap; margin-top:12px; font-size:11px; color:var(--text-dim);}
+.map-legend-item{display:flex; align-items:center; gap:5px;}
+.map-legend-swatch{width:10px; height:10px; border-radius:50%; display:inline-block;}
+
+/* ---------- Butterfly log ---------- */
+.butterfly-list{max-height:50vh; overflow-y:auto; padding-right:4px;}
+.butterfly-item{
+  padding:10px 12px; margin-bottom:10px; background:var(--panel-light); border-left:3px solid var(--corrupt);
+  clip-path:polygon(0 5px,5px 0,calc(100% - 5px) 0,100% 5px,100% calc(100% - 5px),calc(100% - 5px) 100%,5px 100%,0 calc(100% - 5px));
+}
+.butterfly-item:last-child{margin-bottom:0;}
+.butterfly-turn{font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--gold); margin-bottom:3px; display:block;}
+.butterfly-headline{font-size:14px; color:var(--text); margin-bottom:3px;}
+.butterfly-detail{font-size:12.5px; color:var(--text-dim); font-style:italic;}
+.butterfly-empty{color:var(--text-dim); font-style:italic; text-align:center; padding:30px 0;}
+
+/* ---------- NPC detail popup ---------- */
+.npc-box{max-width:560px; width:100%;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="banner">
+    <h1>Ashes of Vaelmoor</h1>
+    <div class="sub">Turn <span class="turn mono" id="turnNum">1</span> — Reign of the Last Ashveil</div>
+    <div class="banner-actions">
+      <button class="banner-btn map-btn" id="mapBtn">Open the Map</button>
+      <button class="banner-btn" id="glossaryBtn">Glossary &amp; Word Search</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="panel area-companions">
+      <h2>Your Companions</h2>
+      <div id="companionList"></div>
+    </div>
+
+    <div class="panel area-ledger">
+      <h2>The Ledger</h2>
+      <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val mono" id="goldVal">0</span></div>
+      <div class="stat-row"><span class="stat-name">Grain</span><span class="stat-val mono" id="grainVal">0</span></div>
+      <div class="stat-row"><span class="stat-name">Soldiers</span><span class="stat-val mono" id="soldiersVal">0</span></div>
+      <div class="stat-row"><span class="stat-name">Faith</span><span class="stat-val mono" id="faithVal">0</span></div>
+      <div class="bar-track"><div class="bar-fill faith" id="faithBar" style="width:0%"></div></div>
+      <div class="stat-row"><span class="stat-name">Corruption</span><span class="stat-val mono" id="corruptionVal">0</span></div>
+      <div class="bar-track"><div class="bar-fill corruption" id="corruptionBar" style="width:0%"></div></div>
+    </div>
+
+    <div class="panel area-realm">
+      <h2>The Realm</h2>
+      <div id="territories"></div>
+    </div>
+
+    <div class="panel event-card area-event" id="eventCard"></div>
+
+    <div class="panel area-actions" id="actionsPanel" style="display:none;">
+      <h2>The Council Awaits Your Word</h2>
+      <div class="actions-grid" id="actionsGrid"></div>
+    </div>
+
+    <div class="panel area-activities" id="activitiesPanel" style="display:none;">
+      <h2>Around Ashveil Hold</h2>
+      <div class="activity-grid" id="activityGrid"></div>
+    </div>
+
+    <div class="panel area-chronicle">
+      <h2>The Chronicle</h2>
+      <div class="chronicle" id="chronicle"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-box" id="overlayBox"></div>
+</div>
+
+<div class="overlay hidden" id="glossaryOverlay">
+  <div class="overlay-box glossary-box">
+    <h2>Glossary &amp; Word Search</h2>
+    <input type="text" class="glossary-search" id="glossarySearch" placeholder="Search for a word, e.g. 'corruption', 'parley', 'garrison'...">
+    <div class="glossary-list" id="glossaryList"></div>
+    <div class="glossary-close-row">
+      <button class="big-btn" id="glossaryCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="travelOverlay">
+  <div class="overlay-box travel-box" id="travelBox"></div>
+</div>
+
+<div class="overlay hidden" id="talkOverlay">
+  <div class="overlay-box talk-box" id="talkBox"></div>
+</div>
+
+<div class="overlay hidden" id="mapOverlay">
+  <div class="overlay-box map-box" id="mapBox"></div>
+</div>
+<script>
+/* =====================================================
+   ASHES OF VAELMOOR — Core Data Layer
+   ===================================================== */
+
+/* ---------- Characters & Relationships ---------- */
+// Trust ranges 0-100. Bands: Hostile(0-19) Wary(20-39) Neutral(40-59) Trusted(60-79) Devoted(80-100)
+const CHARACTERS = {
+  korrath:{
+    id:'korrath', name:'General Thessa Korrath', role:'Master of War',
+    color:'#8a3232', startTrust:55,
+    sigilPath:'M12 2 L20 8 L20 16 L12 22 L4 16 L4 8 Z M12 6 L12 18 M7 9 L17 9', // crossed-blade emblem (drawn via SVG, see render)
+    bio:"A scarred veteran who has buried more friends than she's made, and trusts steel more than words.",
+    bands:{
+      hostile:"Korrath obeys your orders, but barely speaks to you otherwise. She is waiting for you to fail.",
+      wary:"Korrath is professional but guarded. She follows orders without much warmth.",
+      neutral:"Korrath does her duty and respects the chain of command, nothing more, nothing less.",
+      trusted:"Korrath speaks plainly with you now, the way she would to someone she'd actually follow into the Wastes.",
+      devoted:"Korrath would walk into the Ember Wastes alone if you asked her to. She'd rather you didn't ask."
+    }
+  },
+  seris:{
+    id:'seris', name:'Lady Vyra Seris', role:'Spymaster',
+    color:'#7a4ea3', startTrust:55,
+    bio:"Quiet, precise, and always one step ahead of whatever's coming. Loyal in her own careful way.",
+    bands:{
+      hostile:"Seris tells you only what you ask for, and not a word more. You suspect she's keeping a second ledger.",
+      wary:"Seris is correct and distant. Her reports are thorough but her trust clearly isn't given easily.",
+      neutral:"Seris does good work and keeps her own counsel, as she always has.",
+      trusted:"Seris brings you things before you ask for them now — she's decided you're worth the early warning.",
+      devoted:"Seris has stopped pretending she doesn't care how this ends for you specifically, not just the kingdom."
+    }
+  },
+  ilun:{
+    id:'ilun', name:'Brother Ilun', role:'Keeper of Vigils',
+    color:'#c79a47', startTrust:55,
+    bio:"The last man in Vaelmoor who still remembers the old wards, and the price they were bought with.",
+    bands:{
+      hostile:"Ilun still keeps his vigils, but he no longer shares what he finds in them with you.",
+      wary:"Ilun is dutiful but careful around you, like a man watching a candle he's not sure will stay lit.",
+      neutral:"Ilun continues his work quietly, observing more than he comments on.",
+      trusted:"Ilun has started teaching you the old wards properly, trusting you with what's left of the old faith.",
+      devoted:"Ilun believes, plainly and without hedging, that you are not what the Unmaker made your father into."
+    }
+  }
+};
+
+function trustBand(v){
+  if(v<20) return 'hostile';
+  if(v<40) return 'wary';
+  if(v<60) return 'neutral';
+  if(v<80) return 'trusted';
+  return 'devoted';
+}
+function trustLabel(v){
+  return {hostile:'Hostile', wary:'Wary', neutral:'Neutral', trusted:'Trusted', devoted:'Devoted'}[trustBand(v)];
+}
+
+function adjustTrust(s, charId, amount, reasonText){
+  const before=s.companions[charId].trust;
+  s.companions[charId].trust=Math.max(0,Math.min(100,before+amount));
+  const after=s.companions[charId].trust;
+  const bandBefore=trustBand(before), bandAfter=trustBand(after);
+  if(bandBefore!==bandAfter){
+    logButterfly(s, charId, `${CHARACTERS[charId].name}'s trust in you shifted from ${trustLabel(before)} to ${trustLabel(after)}.`, reasonText);
+  }
+  // Departure check: only at true rock bottom, and only once.
+  if(after<=5 && !s.companions[charId].departed && !s.flags['departed_'+charId]){
+    triggerDeparture(s, charId);
+  }
+}
+
+function triggerDeparture(s, charId){
+  s.companions[charId].departed=true;
+  s.flags['departed_'+charId]=true;
+  const ch=CHARACTERS[charId];
+  let text='';
+  if(charId==='korrath') text=`${ch.name} hands you her commission, formally, in front of the garrison. "I didn't survive this long taking orders I don't believe in. Find someone else to bleed for you." She rides out before dawn.`;
+  if(charId==='seris') text=`${ch.name} leaves no note, no goodbye, nothing — just an empty room and a ledger left open to a page that simply reads: "Find your own secrets now."`;
+  if(charId==='ilun') text=`${ch.name} sets down the cracked shard of the Ember Throne on your table, gently, like something he's afraid of dropping. "I cannot ward a man who has stopped wanting to be warded." He does not look back.`;
+  logButterfly(s, charId, `${ch.name} has left Ashveil Hold for good.`, text);
+  addLog(s, `${ch.name} has departed. ${text}`);
+}
+
+/* ---------- Butterfly Effect Log ---------- */
+// Records major consequence chains the player can review on the map.
+function logButterfly(s, tag, headline, detail){
+  s.butterflies.push({turn:s.turn, tag, headline, detail:detail||''});
+}
+
+/* ---------- Territories ----------
+   ~35 territories across six regions, spaced out on a large map (0-100 coords,
+   but the map itself now spans a much bigger pannable canvas).
+   Tiers: 1 = borderlands (near Ashveil Hold), 2 = midlands, 3 = the inner ring
+   bordering the Ember Wastes. Garrisons and rewards scale with tier.
+   `adj` lists territory ids (or 'hold' for Ashveil Hold) that must be controlled
+   before this one can be attacked — you campaign outward, not teleport around.
+------------------------------------------------------------------ */
+const TERRITORY_DATA = [
+  /* ===== REGION: The Dunmar Lowlands (north) ===== */
+  {id:'dunmar', name:'Dunmar Reach', region:'The Dunmar Lowlands', owner:'Hollow Garrison', garrison:14, goldInc:3, grainInc:14, travelDays:2, tier:1, adj:['hold'],
+   x:140, y:90, kind:'farmland',
+   desc:"Once the breadbasket of Vaelmoor, its fields are ploughed by thralls beneath a sky the colour of a bruise."},
+  {id:'millbrook', name:'Millbrook', region:'The Dunmar Lowlands', owner:'Hollow Garrison', garrison:11, goldInc:4, grainInc:10, travelDays:2, tier:1, adj:['hold'],
+   x:95, y:75, kind:'farmland',
+   desc:"A river-mill village whose wheel still turns, though no one alive remembers who it turns for anymore."},
+  {id:'thornwell', name:'Thornwell', region:'The Dunmar Lowlands', owner:'Hollow Garrison', garrison:16, goldInc:5, grainInc:8, travelDays:3, tier:1, adj:['dunmar','millbrook'],
+   x:170, y:60, kind:'farmland',
+   desc:"A walled market town that once fed half the kingdom, now feeding only the Hollow Garrison's appetite."},
+  {id:'ravensfen', name:"Raven's Fen", region:'The Dunmar Lowlands', owner:'Hollow Garrison', garrison:19, goldInc:2, grainInc:6, travelDays:3, tier:2, adj:['thornwell'],
+   x:200, y:40, kind:'marsh',
+   desc:"A fen choked with crows that never seem to leave, circling something in the reeds no one will name."},
+
+  /* ===== REGION: The Greywood (west) ===== */
+  {id:'greywood', name:'The Greywood', region:'The Greywood', owner:'Bandit Lords', garrison:12, goldInc:5, grainInc:4, travelDays:2, tier:1, adj:['hold'],
+   x:-90, y:30, kind:'forest',
+   desc:"An ancient forest where outlaw kings hold court beneath trees older than the kingdom itself."},
+  {id:'oldoak', name:"Old Oak Crossing", region:'The Greywood', owner:'Bandit Lords', garrison:13, goldInc:4, grainInc:5, travelDays:2, tier:1, adj:['hold','greywood'],
+   x:-50, y:55, kind:'forest',
+   desc:"A crossroads beneath a single ancient oak, said to have watched every army that ever marched through Vaelmoor."},
+  {id:'hollowmere', name:'Hollowmere', region:'The Greywood', owner:'Bandit Lords', garrison:17, goldInc:6, grainInc:3, travelDays:3, tier:2, adj:['greywood','oldoak'],
+   x:-130, y:0, kind:'forest',
+   desc:"A black lake at the Greywood's heart, named generations before the Hollowing, in a coincidence no one likes discussing."},
+  {id:'wraithhollow', name:'Wraith Hollow', region:'The Greywood', owner:'Bandit Lords', garrison:21, goldInc:7, grainInc:2, travelDays:4, tier:2, adj:['hollowmere'],
+   x:-170, y:-30, kind:'forest',
+   desc:"The deepest bandit stronghold, a ravine fortress where even the Greywood's outlaws fear to linger after dark."},
+
+  /* ===== REGION: Coldspire Reaches (north-east mountains) ===== */
+  {id:'coldspire', name:'Coldspire Pass', region:'Coldspire Reaches', owner:'The Free Company', garrison:18, goldInc:9, grainInc:0, travelDays:3, tier:1, adj:['hold'],
+   x:60, y:160, kind:'mountain',
+   desc:"A mountain choke-point held by mercenaries loyal only to coin."},
+  {id:'frosthold', name:'Frosthold', region:'Coldspire Reaches', owner:'The Free Company', garrison:20, goldInc:8, grainInc:0, travelDays:3, tier:2, adj:['coldspire'],
+   x:90, y:200, kind:'mountain',
+   desc:"A fortress carved into the mountainside, its garrison rotated so often no one outside truly knows its numbers."},
+  {id:'skarrow', name:"Skarrow's Climb", region:'Coldspire Reaches', owner:'The Free Company', garrison:24, goldInc:10, grainInc:0, travelDays:4, tier:2, adj:['frosthold'],
+   x:140, y:230, kind:'mountain',
+   desc:"A switchback mountain road, named for the company captain who reportedly still haunts its worst drop."},
+  {id:'thegullet', name:'The Gullet', region:'Coldspire Reaches', owner:'The Free Company', garrison:27, goldInc:11, grainInc:0, travelDays:4, tier:3, adj:['skarrow'],
+   x:170, y:270, kind:'mountain',
+   desc:"A narrow defile so steep that armies have died there from the cold alone, let alone the mercenaries waiting in it."},
+
+  /* ===== REGION: Saltmere Coast (east) ===== */
+  {id:'saltmere', name:'Saltmere Harbor', region:'Saltmere Coast', owner:'The Drowned Fleet', garrison:15, goldInc:12, grainInc:2, travelDays:3, tier:1, adj:['hold'],
+   x:230, y:130, kind:'coast',
+   desc:"A pirate haven where black-sailed ships ride at anchor in the fog."},
+  {id:'greyrock', name:'Greyrock Isle', region:'Saltmere Coast', owner:'The Drowned Fleet', garrison:17, goldInc:13, grainInc:0, travelDays:3, tier:1, adj:['saltmere'],
+   x:270, y:100, kind:'coast',
+   desc:"A tidal island fortress, reachable only at low tide — by design, the Drowned Fleet insists."},
+  {id:'driftwood', name:'Driftwood Landing', region:'Saltmere Coast', owner:'The Drowned Fleet', garrison:19, goldInc:14, grainInc:1, travelDays:4, tier:2, adj:['greyrock'],
+   x:300, y:150, kind:'coast',
+   desc:"A shipbreaker's yard where half the Drowned Fleet's hulls were born from the wrecks of someone else's."},
+  {id:'thedrowned', name:"The Drowned Mile", region:'Saltmere Coast', owner:'The Drowned Fleet', garrison:23, goldInc:15, grainInc:0, travelDays:4, tier:3, adj:['driftwood'],
+   x:330, y:110, kind:'coast',
+   desc:"A stretch of coastline that floods twice a day, said to drown anyone who anchors there without the Fleet's blessing."},
+
+  /* ===== REGION: Brackenfort Duchy (south-east) ===== */
+  {id:'brackenfort', name:'Brackenfort', region:'Brackenfort Duchy', owner:'Duke Mavros', garrison:22, goldInc:6, grainInc:6, travelDays:2, tier:1, adj:['hold'],
+   x:90, y:-40, kind:'keep',
+   desc:"A grim stone keep, seat of the rival who would call himself king."},
+  {id:'eastwatch', name:'Eastwatch', region:'Brackenfort Duchy', owner:'Duke Mavros', garrison:18, goldInc:5, grainInc:7, travelDays:2, tier:1, adj:['hold','brackenfort'],
+   x:50, y:-70, kind:'keep',
+   desc:"A garrison town built to watch the eastern road, now mostly watching for an attack it knows is coming."},
+  {id:'graymoor', name:'Graymoor', region:'Brackenfort Duchy', owner:'Duke Mavros', garrison:25, goldInc:7, grainInc:5, travelDays:3, tier:2, adj:['brackenfort','eastwatch'],
+   x:130, y:-90, kind:'keep',
+   desc:"Mavros's second seat, a moorland keep where his household guard trains year-round."},
+  {id:'highgarrison', name:'High Garrison', region:'Brackenfort Duchy', owner:'Duke Mavros', garrison:30, goldInc:8, grainInc:4, travelDays:4, tier:3, adj:['graymoor'],
+   x:170, y:-120, kind:'keep',
+   desc:"The largest standing army outside the Ember Wastes itself, drilled daily for a war Mavros insists is inevitable."},
+
+  /* ===== REGION: The Sunken Marsh (south) ===== */
+  {id:'marsh', name:'The Sunken Marsh', region:'The Sunken Marsh', owner:'The Marsh-Mothers', garrison:16, goldInc:1, grainInc:0, travelDays:4, tier:1, adj:['hold'],
+   x:0, y:-110, kind:'marsh',
+   desc:"A drowned forest where cultists of the Unmaker whisper to things beneath the water."},
+  {id:'mudreach', name:'Mudreach', region:'The Sunken Marsh', owner:'The Marsh-Mothers', garrison:19, goldInc:1, grainInc:0, travelDays:4, tier:2, adj:['marsh'],
+   x:-40, y:-140, kind:'marsh',
+   desc:"A waterlogged hamlet that the Marsh-Mothers claimed generations ago and never let go of."},
+  {id:'thesinking', name:'The Sinking Road', region:'The Sunken Marsh', owner:'The Marsh-Mothers', garrison:22, goldInc:0, grainInc:0, travelDays:5, tier:2, adj:['mudreach'],
+   x:-80, y:-170, kind:'marsh',
+   desc:"A causeway that floods a little more every year, leading somewhere the Marsh-Mothers don't want visitors going."},
+  {id:'deepmire', name:'Deepmire Shrine', region:'The Sunken Marsh', owner:'The Marsh-Mothers', garrison:26, goldInc:0, grainInc:0, travelDays:5, tier:3, adj:['thesinking'],
+   x:-120, y:-200, kind:'marsh',
+   desc:"The Marsh-Mothers' innermost shrine, sunk so deep into the bog that even they speak of it carefully."},
+
+  /* ===== REGION: The Ember Approach (innermost ring, surrounds the Wastes) ===== */
+  {id:'cinderfield', name:'Cinderfield', region:'The Ember Approach', owner:'Hollow-Touched', garrison:32, goldInc:0, grainInc:0, travelDays:4, tier:3, adj:['ravensfen','thornwell'],
+   x:170, y:130, kind:'ruin',
+   desc:"A field of permanently blackened grass, the first land the Hollowing ever touched outside the capital itself."},
+  {id:'ashfall', name:'Ashfall Ridge', region:'The Ember Approach', owner:'Hollow-Touched', garrison:34, goldInc:0, grainInc:0, travelDays:4, tier:3, adj:['skarrow','thegullet'],
+   x:120, y:190, kind:'ruin',
+   desc:"A ridge perpetually dusted in fine grey ash that falls from a sky that is, technically, clear."},
+  {id:'thecrucible', name:'The Crucible', region:'The Ember Approach', owner:'Hollow-Touched', garrison:36, goldInc:0, grainInc:0, travelDays:5, tier:3, adj:['thedrowned','driftwood'],
+   x:200, y:160, kind:'ruin',
+   desc:"A blasted crater of fused glass and stone, where something immense clearly once landed, or erupted, or both."},
+  {id:'graspingwood', name:'The Grasping Wood', region:'The Ember Approach', owner:'Hollow-Touched', garrison:33, goldInc:0, grainInc:0, travelDays:4, tier:3, adj:['highgarrison','graymoor'],
+   x:80, y:30, kind:'ruin',
+   desc:"A forest of dead trees whose branches all, inexplicably, bend toward the Ember Wastes."},
+  {id:'lastlitmile', name:'The Last Lit Mile', region:'The Ember Approach', owner:'Hollow-Touched', garrison:31, goldInc:0, grainInc:0, travelDays:5, tier:3, adj:['deepmire','thesinking'],
+   x:0, y:-60, kind:'ruin',
+   desc:"A single road where, against all reason, the streetlamps from the old kingdom still burn, every night, alone."},
+  {id:'emberwastes', name:'The Ember Wastes', region:'The Ember Approach', owner:'The Hollow King', garrison:55, goldInc:0, grainInc:0, travelDays:6, tier:4, final:true,
+   adj:['cinderfield','ashfall','thecrucible','graspingwood','lastlitmile'],
+   x:50, y:60, kind:'ruin',
+   desc:"The ruin of the capital, where the throne still burns with a fire that gives no warmth."}
+];
+
+const ASHVEIL_HOLD={x:0,y:0,name:'Ashveil Hold'};
+
+/* ---------- Mystery Sites (revealed through exploration / events) ---------- */
+const MYSTERY_SITES=[
+  {id:'shrine', name:'The Root-Bound Shrine', x:-25,y:18, discovered:false,
+   desc:"An old shrine, half-swallowed by roots, somewhere between Ashveil and the Greywood."},
+  {id:'cairn', name:'The Soldiers\u2019 Cairn', x:75,y:120, discovered:false,
+   desc:"A stone cairn raised for the dead of a battle no one living remembers fighting."},
+  {id:'tower', name:'The Drowned Watchtower', x:-20,y:-90, discovered:false,
+   desc:"A watchtower sinking slowly into the marsh, abandoned long before the Marsh-Mothers came."},
+  {id:'wayshrine', name:"The Wayfarer's Shrine", x:160, y:-10, discovered:false,
+   desc:"A small roadside shrine to travelers, kept lit by hands no one has ever seen."},
+  {id:'crownstone', name:'The Crownstone', x:110, y:90, discovered:false,
+   desc:"A single standing stone carved with a crown, far older than the Ashveil line it seems to depict."},
+  {id:'sunkenbell', name:'The Sunken Bell', x:230, y:60, discovered:false,
+   desc:"A bell tower visible only at low tide, ringing faintly with a current no diver has ever explained."}
+];
+
+/* ---------- Travelling NPCs (met on the road, tied to map locations) ---------- */
+const ROAD_NPCS={
+  tilda:{
+    id:'tilda', name:'Tilda the Wanderer', role:'Itinerant Healer', color:'#9a8a76',
+    x:-15, y:45, discovered:false,
+    bio:"A hooded healer who walks the roads of Vaelmoor with no fixed home, tending wounds others won't touch."
+  },
+  mercer:{
+    id:'mercer', name:'Old Mercer', role:'Retired Soldier', color:'#9a8a76',
+    x:140, y:50, discovered:false,
+    bio:"A one-eyed veteran of the old king's army who has seen the Hollowing up close and survived it."
+  },
+  ashchild:{
+    id:'ashchild', name:'The Ash-Marked Child', role:'???', color:'#7a4ea3',
+    x:70, y:45, discovered:false,
+    bio:"A child no one in Vaelmoor can account for, who is always somehow near the Ember Wastes."
+  }
+};
+/* =====================================================
+   ASHES OF VAELMOOR — Events
+   Every choice that matters touches: stats, a companion's trust,
+   and/or the butterfly log, so consequences are visible later.
+   ===================================================== */
+
+const EVENTS = [
+  /* ===================== GENERIC EVENTS ===================== */
+  {
+    id:'refugees', category:'generic', speaker:'seris',
+    title:"Refugees from Dunmar",
+    text:"Lady Seris finds you at the gate. 'Refugees from Dunmar Reach, my lord. Hollow thralls burned their granary for sport. They beg shelter within Ashveil's walls.'",
+    choices:[
+      {label:"Open the gates to them (+ Faith, − Grain, + Seris trust)", run:s=>{
+        s.faith+=8; s.grain-=10; adjustTrust(s,'seris',4);
+        s.flags.shelteredRefugees=true; s.priorityQueue.push('refugeesFollowup');
+        logButterfly(s,'refugees',"You sheltered the Dunmar refugees.","Seris saw it as the kind of mercy a spymaster can build alliances on.");
+        return "The people remember kindness. Word spreads of a lord who has not forgotten them. (+8 faith, -10 grain, Seris trusts you a little more)";
+      }},
+      {label:"We have no grain to spare (− Faith, − Seris trust)", run:s=>{
+        s.faith-=6; adjustTrust(s,'seris',-5);
+        s.flags.turnedAwayRefugees=true; s.priorityQueue.push('refugeesColdShoulder');
+        logButterfly(s,'refugees',"You turned away the Dunmar refugees.","Seris filed it away as a data point about what kind of lord you actually are.");
+        return "Seris's jaw tightens. 'As you command,' she says, and does not meet your eyes again that day. (-6 faith, Seris trusts you less)";
+      }}
+    ]
+  },
+  {
+    id:'drillyard', category:'generic', speaker:'korrath',
+    title:"The Drillyard",
+    text:"General Korrath's voice carries across the yard before you even arrive. 'Half these recruits couldn't hold a line against a strong wind. Give me leave to drill them till their hands bleed, or we march to slaughter.'",
+    choices:[
+      {label:"Drill them hard (+ Soldiers, − Faith, + Korrath trust)", run:s=>{
+        s.soldiers+=3; s.faith-=4; adjustTrust(s,'korrath',5);
+        s.flags.drilledHard=true; s.priorityQueue.push('drillyardFollowup');
+        return "Screams and steel ring through the night, and by morning the recruits stand straighter. Korrath nods once at you — rare praise. (+3 soldiers, -4 faith, Korrath trusts you more)";
+      }},
+      {label:"Mercy first, General (+ Faith, − Korrath trust)", run:s=>{
+        s.faith+=5; adjustTrust(s,'korrath',-3);
+        s.flags.mercyFirst=true; s.priorityQueue.push('korrathGratitude');
+        return "Korrath grunts but obeys. 'Soft hands lose wars,' she mutters, loud enough for you to hear. (+5 faith, Korrath trusts you a little less)";
+      }}
+    ]
+  },
+  {
+    id:'hearthsmoke', category:'generic', speaker:'unmaker',
+    title:"A Voice in the Hearth-Smoke",
+    text:"That night the hearth-fire burns violet at its heart, and a voice that is not a voice curls from the smoke. 'Little ember-king. So small a flame, to challenge what wears your father's crown. I could make you brighter. Only... borrow a little of what I am.'",
+    choices:[
+      {label:"Take what it offers (+ Gold, + Soldiers, ++ Corruption, − Ilun trust)", run:s=>{
+        s.gold+=35; s.soldiers+=6; s.corruption+=18; adjustTrust(s,'ilun',-8);
+        s.flags.tookBargain=true; s.priorityQueue.push('whisperReturns');
+        logButterfly(s,'bargain',"You accepted the Unmaker's first bargain.","Brother Ilun felt it the moment it happened — something in you answered something in the dark.");
+        return "Power floods your veins like cold honey. In the morning your reflection's eyes hold the firelight a heartbeat too long. (+35 gold, +6 soldiers, +18 corruption, Ilun trusts you less)";
+      }},
+      {label:"Cast salt into the flame (+ Faith, − Corruption, + Ilun trust)", run:s=>{
+        s.faith+=6; s.corruption-=8; adjustTrust(s,'ilun',6);
+        s.flags.refusedBargain=true; s.priorityQueue.push('ilunWard');
+        return "The violet light gutters and dies. Brother Ilun, sleepless, nods once from the doorway — as if he felt it too. (+6 faith, -8 corruption, Ilun trusts you more)";
+      }}
+    ]
+  },
+  {
+    id:'vigil', category:'generic', speaker:'ilun',
+    title:"The Vigil of Ashes",
+    text:"Brother Ilun keeps his nightly vigil over a cracked shard of the Ember Throne he carries everywhere. 'They called it the Unmaker's Bargain. The old king traded the kingdom's name for power undying. Names, my lord, are wards. Do not forget yours.'",
+    choices:[
+      {label:"Pray with him through the night (+ Faith, + Ilun trust)", run:s=>{
+        s.faith+=10; adjustTrust(s,'ilun',5);
+        s.flags.prayedWithIlun=true; s.priorityQueue.push('vigilBlessing');
+        return "The vigil candles burn low, but something in the dark recedes a little. (+10 faith, Ilun trusts you more)";
+      }},
+      {label:"There is no time for old stories (− Faith, + Corruption, − Ilun trust)", run:s=>{
+        s.faith-=3; s.corruption+=3; adjustTrust(s,'ilun',-4);
+        s.flags.dismissedIlun=true; s.priorityQueue.push('vigilNeglect');
+        return "Ilun says nothing — but he writes something in his small book, and does not show it to you. (-3 faith, +3 corruption, Ilun trusts you less)";
+      }}
+    ]
+  },
+  {
+    id:'defector', category:'generic', speaker:'seris',
+    title:"A Defector from Brackenfort",
+    text:"A man in Mavros's colors kneels before you, hands bound by Seris's own rope. 'He says Brackenfort's eastern gate stands unguarded most nights, my lord. For a purse of gold, he'll show us the hour.'",
+    choices:[
+      {label:"Pay him (costs 20 Gold, weakens Brackenfort's garrison)", run:s=>{
+        if(s.gold<20) return "Your coffers are too thin to even consider it. Seris reads your face and quietly sends the man away.";
+        s.gold-=20;
+        const t=s.territories.find(x=>x.id==='brackenfort');
+        t.garrison=Math.max(4,t.garrison-4);
+        s.flags.paidDefector=true; s.priorityQueue.push('gateAjar');
+        return "Gold changes hands. Somewhere, a gate will be left ajar. (-20 gold, Brackenfort's garrison weakened)";
+      }},
+      {label:"Turn him away — a man who sells one lord will sell another (+ Faith, + Seris trust)", run:s=>{
+        s.faith+=2; adjustTrust(s,'seris',3);
+        s.flags.refusedDefector=true; s.priorityQueue.push('serisNetwork');
+        return "Seris's eyes glint with something like approval as the man is led off in chains. (+2 faith, Seris trusts you more)";
+      }}
+    ]
+  },
+  {
+    id:'saltmereStorm', category:'generic', speaker:'korrath',
+    title:"Storm Over Saltmere",
+    text:"Korrath returns from the coast road grinning beneath her scars. 'A storm broke three of the pirate-king's hulls against the rocks last night. Saltmere's walls stand half-manned while they fish their dead from the surf.'",
+    choices:[
+      {label:"Good. We strike while they're weak (weakens Saltmere's garrison, − Faith)", run:s=>{
+        const t=s.territories.find(x=>x.id==='saltmere');
+        t.garrison=Math.max(2,t.garrison-3); s.faith-=1;
+        s.flags.struckWeakSaltmere=true; s.priorityQueue.push('saltmereRetaliation');
+        return "Korrath marks the harbor on her map with something close to relish. (Saltmere's garrison weakened)";
+      }},
+      {label:"Even our enemies deserve to grieve their dead (+ Faith, + Korrath trust)", run:s=>{
+        s.faith+=4; adjustTrust(s,'korrath',2);
+        s.flags.sparedSaltmere=true; s.priorityQueue.push('saltmereGift');
+        return "Korrath looks at you a long moment, then simply nods. 'Didn't expect that. Not a complaint.' (+4 faith, Korrath trusts you more)";
+      }}
+    ]
+  },
+  {
+    id:'marshOffer', category:'generic', speaker:'marshmother',
+    title:"The Marsh-Mothers' Offer",
+    text:"A reed-thin woman wades out of the Sunken Marsh under a flag of pale fungus-light. 'The Unmaker's children ask little. Look away from our rites, and the Marsh's spears will not bar your road.' Brother Ilun's hand tightens on his small book.",
+    choices:[
+      {label:"Accept — fewer spears means fewer graves (weakens Marsh garrison, ++ Corruption, −− Ilun trust)", run:s=>{
+        const t=s.territories.find(x=>x.id==='marsh');
+        t.garrison=2; s.corruption+=12; adjustTrust(s,'ilun',-7);
+        s.flags.marshAlliance=true; s.priorityQueue.push('marshPriceRises');
+        logButterfly(s,'marsh-bargain',"You struck a quiet bargain with the Marsh-Mothers.","Brother Ilun watched you do it and said nothing — which somehow felt worse than if he'd argued.");
+        return "The woman smiles with too many teeth and sinks back into the reeds. Ilun does not speak to you that evening. (Marsh's garrison crumbles, +12 corruption, Ilun trusts you much less)";
+      }},
+      {label:"Refuse. We do not bargain with what wears human faces as masks (+ Faith, + Ilun trust, strengthens Marsh garrison)", run:s=>{
+        s.faith+=7; adjustTrust(s,'ilun',5);
+        const t=s.territories.find(x=>x.id==='marsh');
+        t.garrison+=2;
+        s.flags.marshRefused=true; s.priorityQueue.push('marshStirs');
+        return "The fungus-light gutters out. Somewhere in the marsh, something old takes note of you. (+7 faith, Ilun trusts you more, Marsh's garrison strengthens)";
+      }}
+    ]
+  },
+  {
+    id:'granaries', category:'generic', speaker:'seris',
+    title:"The Granaries Run Thin",
+    text:"Seris lays a ledger before you, ink smudged with too many corrections. 'Grain stores will not last the season at this rate, my lord. We can ration — the people will tighten their belts and grumble. Or we can requisition from the border villages, by force if need be.'",
+    choices:[
+      {label:"Ration (+ Grain, − Faith)", run:s=>{
+        s.grain+=5; s.faith-=4;
+        s.flags.rationed=true; s.priorityQueue.push('grumbling');
+        return "Belts tighten across Ashveil Hold. The grumbling is quiet, but it is there. (+5 grain, -4 faith)";
+      }},
+      {label:"Requisition from the villages (++ Grain, −− Faith, + Corruption, − Korrath trust)", run:s=>{
+        s.grain+=18; s.faith-=9; s.corruption+=4; adjustTrust(s,'korrath',-3);
+        s.flags.requisitioned=true; s.priorityQueue.push('villageRises');
+        return "Carts return laden with grain, and with the silence of villages that watched it taken. Korrath carried out the order, but her jaw was tight the whole time. (+18 grain, -9 faith, +4 corruption, Korrath trusts you less)";
+      }}
+    ]
+  },
+  {
+    id:'korrathDoubt', category:'generic', speaker:'korrath',
+    title:"Korrath's Doubt",
+    text:"Korrath catches you alone, voice low. 'The men ask what truly waits in the Ember Wastes. Some have heard... things. Do we tell them the old king became something else, or let them believe it's only a man on a throne?'",
+    choices:[
+      {label:"Tell them the truth (+ Faith, − Corruption, + Korrath trust)", run:s=>{
+        s.faith+=5; s.corruption-=3; adjustTrust(s,'korrath',4);
+        s.flags.toldTruth=true; s.priorityQueue.push('steelResolve');
+        return "Fear thins the ranks by a few deserters, but those who remain stand straighter. Korrath looks relieved you didn't ask her to lie for you. (+5 faith, -3 corruption, Korrath trusts you more)";
+      }},
+      {label:"Let them believe a comforting lie (+ Soldiers, + Corruption, − Korrath trust)", run:s=>{
+        s.soldiers+=2; s.corruption+=5; adjustTrust(s,'korrath',-4);
+        s.flags.comfortingLie=true; s.priorityQueue.push('cracksInStory');
+        return "Korrath exhales, relieved and ashamed in equal measure. Fewer men slip away in the night, but something about the order sat badly with her. (+2 soldiers, +5 corruption, Korrath trusts you less)";
+      }}
+    ]
+  },
+  {
+    id:'spyKitchens', category:'generic', speaker:'seris',
+    title:"The Spy in the Kitchens",
+    text:"Seris drags a trembling scullion before you by the collar. 'Hollow gold in his mattress, my lord, and a list of our grain stores in his own hand. Your judgment?'",
+    choices:[
+      {label:"Make an example of him (+ Soldiers, − Faith, + Corruption, − Seris trust)", run:s=>{
+        s.soldiers+=1; s.faith-=5; s.corruption+=6; adjustTrust(s,'seris',-5);
+        s.flags.executedSpy=true; s.priorityQueue.push('executionerShadow');
+        return "Fear keeps order, for a while. Seris watches the execution with an unreadable expression — this isn't the kind of leverage she deals in. (+1 soldier, -5 faith, +6 corruption, Seris trusts you less)";
+      }},
+      {label:"Exile him beyond the walls (+ Faith, + Seris trust)", run:s=>{
+        s.faith+=4; adjustTrust(s,'seris',3);
+        s.flags.exiledSpy=true; s.priorityQueue.push('unlikelyReturn');
+        return "He is sent out the gate with nothing but the clothes on his back. Seris approves — mercy, used correctly, is a tool too. (+4 faith, Seris trusts you more)";
+      }}
+    ]
+  },
+  {
+    id:'emberDream', category:'generic', speaker:'ilun',
+    title:"The Ember Dream",
+    text:"You wake gasping from a dream of a throne built from cooling coals, and a crown that fits like a brand. Brother Ilun, already at your door, says only: 'The closer you draw to the Wastes, the louder it dreams for both of us.'",
+    choices:[
+      {label:"Ask him to teach you the old wards (+ Faith, − Corruption, + Ilun trust)", run:s=>{
+        s.faith+=6; s.corruption-=4; adjustTrust(s,'ilun',4);
+        s.flags.learnedWards=true; s.priorityQueue.push('wardTakesHold');
+        return "He teaches you words in a language with no living speakers. They taste like ash and like relief. (+6 faith, -4 corruption, Ilun trusts you more)";
+      }},
+      {label:"Tell him it was only a dream (+ Corruption, − Ilun trust)", run:s=>{
+        s.corruption+=5; adjustTrust(s,'ilun',-3);
+        s.flags.dismissedDream=true; s.priorityQueue.push('dreamDeepens');
+        return "He looks at you for a long moment, then simply bows and leaves. The crown-shaped brand mark on your wrist itches for days. (+5 corruption, Ilun trusts you less)";
+      }}
+    ]
+  },
+  {
+    id:'mavrosOffer', category:'generic', speaker:'herald',
+    title:"Mavros's Offer",
+    text:"A herald from Brackenfort arrives under a truce-banner. 'Duke Mavros proposes this: leave his walls untouched, and he'll see a tithe of grain sent to Ashveil each season, for as long as neither of you draws first blood.'",
+    choices:[
+      {label:"Accept the tithe (+ Grain, strengthens Brackenfort's garrison)", run:s=>{
+        s.grain+=12;
+        const t=s.territories.find(x=>x.id==='brackenfort');
+        t.garrison+=2;
+        s.flags.mavrosTruce=true; s.priorityQueue.push('mavrosBold');
+        return "Grain carts begin arriving from Brackenfort within the week. Behind his walls, Mavros's masons get back to work. (+12 grain, Brackenfort's garrison strengthens)";
+      }},
+      {label:"Refuse. There is only one crown in Vaelmoor (+ Faith, + Korrath trust, strengthens Brackenfort's garrison)", run:s=>{
+        s.faith+=2; adjustTrust(s,'korrath',2);
+        const t=s.territories.find(x=>x.id==='brackenfort');
+        t.garrison+=2;
+        s.flags.mavrosWar=true; s.priorityQueue.push('brackenfortPrepares');
+        return "The herald departs stiffly. Korrath looks satisfied you didn't take the bait. Behind Brackenfort's walls, war-horns begin to sound. (+2 faith, Korrath trusts you more, Brackenfort's garrison strengthens)";
+      }}
+    ]
+  },
+  {
+    id:'bellRinger', category:'generic', speaker:'watchcaptain',
+    title:"The Bell-Ringer's Warning",
+    text:"A breathless watch-captain rushes to find you. 'Hollow scouts on the eastern ridge, my lord — three of them, just watching. They didn't attack. They didn't even hide.'",
+    choices:[
+      {label:"Double the watch (costs 10 Gold, + Faith)", run:s=>{
+        if(s.gold<10) return "There's no coin left for extra watches. The captain salutes and leaves looking uneasy.";
+        s.gold-=10; s.faith+=3;
+        return "Extra torches burn along the walls through the night. The scouts do not return. (-10 gold, +3 faith)";
+      }},
+      {label:"Send Seris to track them (+ Gold, + Seris trust)", run:s=>{
+        s.gold+=5; s.faith-=2; adjustTrust(s,'seris',2);
+        return "Seris returns two days later, saying little, but with a purse heavier than when she left. (+5 gold, -2 faith, Seris trusts you more)";
+      }},
+      {label:"Ignore it — let them watch (+ Corruption)", run:s=>{
+        s.corruption+=2;
+        return "You go about your business. That night, the hearth-fire seems to flicker a little longer than it should. (+2 corruption)";
+      }}
+    ]
+  },
+  {
+    id:'greywoodSong', category:'generic',
+    condition: s=>{ const t=s.territories.find(x=>x.id==='greywood'); return t && !t.conquered; },
+    speaker:'narrator',
+    title:"A Song from the Greywood",
+    text:"At dusk, a haunting melody drifts from the Greywood's edge — the bandit-lords' way of reminding Ashveil Hold they're still there. Korrath says it's meant to unsettle. Ilun says it's a kind of prayer.",
+    choices:[
+      {label:"Have your musicians answer in kind (+ Faith)", run:s=>{ s.faith+=4; return "For one strange night, two enemy camps share a song neither will admit to enjoying. (+4 faith)"; }},
+      {label:"Send scouts to investigate while the song plays (weakens Greywood's garrison)", run:s=>{
+        const t=s.territories.find(x=>x.id==='greywood');
+        t.garrison=Math.max(2,t.garrison-1);
+        return "Under cover of the music, your scouts map the bandit camp's weak points. (Greywood's garrison weakened)";
+      }},
+      {label:"Ignore it and reinforce the walls instead (costs 10 Gold, + Faith)", run:s=>{
+        if(s.gold<10) return "There's no coin for it tonight. The song plays on, unanswered.";
+        s.gold-=10; s.faith+=2;
+        return "Masons work through the eerie music, and the walls are a little sturdier for it. (-10 gold, +2 faith)";
+      }}
+    ]
+  },
+  {
+    id:'coldspireToll', category:'generic',
+    condition: s=>{ const t=s.territories.find(x=>x.id==='coldspire'); return t && !t.conquered; },
+    speaker:'rider',
+    title:"Coldspire's Toll",
+    text:"A rider from the Free Company arrives, polite as a drawn blade. 'Coldspire Pass charges toll for safe passage these days, my lord. Pay, or your caravans take the long road through the Greywood instead.'",
+    choices:[
+      {label:"Pay the toll (costs 8 Gold, + Grain)", run:s=>{
+        if(s.gold<8) return "You can't spare the toll. The rider shrugs and rides off without another word.";
+        s.gold-=8; s.grain+=6;
+        return "The toll is paid, and your caravans return heavier than they left. (-8 gold, +6 grain)";
+      }},
+      {label:"Refuse — find another route (− Grain, + Faith)", run:s=>{ s.grain-=4; s.faith+=2; return "The long road costs you supplies, but your people note you don't bow easily to mercenaries. (-4 grain, +2 faith)"; }},
+      {label:"Have Seris bribe the rider for details (costs 12 Gold, weakens Coldspire's garrison, + Seris trust)", run:s=>{
+        if(s.gold<12) return "There's nothing to bribe him with. He rides off, and the toll stands.";
+        s.gold-=12; adjustTrust(s,'seris',2);
+        const t=s.territories.find(x=>x.id==='coldspire');
+        t.garrison=Math.max(2,t.garrison-1);
+        return "Loose lips and a heavy purse buy you a map of Coldspire's weaker watch-points. (-12 gold, Coldspire's garrison weakened, Seris trusts you more)";
+      }}
+    ]
+  },
+  {
+    id:'ashveilChildren', category:'generic', speaker:'elder',
+    title:"The Children of Ashveil",
+    text:"An elder brings you to the courtyard, where children are playing a game — one of them, crowned with a circlet of dead leaves, pretends to be 'the Hollow King,' and the others pretend to fight him. The elder looks embarrassed. 'They don't understand, my lord. Should we stop them?'",
+    choices:[
+      {label:"Let them play — fear loses its power when it's just a game (+ Faith)", run:s=>{ s.faith+=5; return "You watch a while, and find yourself almost smiling. The 'Hollow King' loses, as he always does in these games. (+5 faith)"; }},
+      {label:"Tell them a story about the real Vaelmoor, before the Hollowing (+ Faith more, − Corruption)", run:s=>{ s.faith+=7; s.corruption-=2; return "You tell them what the kingdom looked like once — not perfect, but whole. They listen more than you expected. (+7 faith, -2 corruption)"; }},
+      {label:"Have the game stopped — some things shouldn't be mocked (− Faith, + Corruption)", run:s=>{ s.faith-=3; s.corruption+=2; return "The children scatter, confused and a little afraid. The leaf-crown is left behind in the dirt. (-3 faith, +2 corruption)"; }}
+    ]
+  },
+  {
+    id:'merchantCaravan', category:'generic', speaker:'merchant',
+    title:"A Merchant's Caravan",
+    text:"A merchant caravan rolls through Ashveil's gates, laden with goods from territories you don't yet control. 'Word travels fast, my lord. Everyone wants to trade with the side that might actually still be here next season.'",
+    choices:[
+      {label:"Trade heavily (+ Gold, − Grain)", run:s=>{ s.gold+=20; s.grain-=8; return "The merchant leaves with most of your surplus grain and a satisfied look. (+20 gold, -8 grain)"; }},
+      {label:"Trade modestly (+ Gold, + Grain)", run:s=>{ s.gold+=8; s.grain+=4; return "A smaller deal, but a fair one — and a few sacks of grain change hands the other way too. (+8 gold, +4 grain)"; }},
+      {label:"Decline — Ashveil doesn't need outside eyes counting our stores (+ Faith)", run:s=>{ s.faith+=2; return "The merchant shrugs and moves on. Your stewards seem relieved no one got a look at the ledgers. (+2 faith)"; }}
+    ]
+  },
+  {
+    id:'armoryFind', category:'generic', speaker:'korrath',
+    title:"The Ashveil Armory",
+    text:"Korrath leads you down into a forgotten cellar beneath the Hold — racks of old weapons and armor, untouched since before the Hollowing, the steel somehow still bright. 'Whatever ward kept this place sealed,' she says, 'it held.'",
+    choices:[
+      {label:"Arm the soldiers with it (+ Soldiers, + Faith, + Korrath trust)", run:s=>{ s.soldiers+=3; s.faith+=2; adjustTrust(s,'korrath',2); return "Recruits who looked like farmers an hour ago now look like soldiers. Morale rises with the steel. (+3 soldiers, +2 faith, Korrath trusts you more)"; }},
+      {label:"Sell what we don't need (+ Gold)", run:s=>{ s.gold+=18; return "Antique steel fetches a fine price from collectors who don't ask where it came from. (+18 gold)"; }},
+      {label:"Have Ilun examine it first (+ Faith, − Corruption, + Ilun trust)", run:s=>{ s.faith+=3; s.corruption-=2; adjustTrust(s,'ilun',2); return "Ilun finds old wards etched into the steel — protective ones. He clears them for use, relieved. (+3 faith, -2 corruption, Ilun trusts you more)"; }}
+    ]
+  },
+  {
+    id:'ilunTranslation', category:'generic', speaker:'ilun',
+    title:"Brother Ilun's Translation",
+    text:"Ilun finally finishes translating a page from the old text he's carried since you were children. His hands shake. 'It names the Unmaker's first vessel. It wasn't your father, my lord. He was only the second.'",
+    choices:[
+      {label:"Ask what happened to the first (+ Faith, + Ilun trust)", run:s=>{ s.faith+=4; adjustTrust(s,'ilun',2); return "Ilun reads on, quietly, and for once doesn't seem afraid of where the story leads. (+4 faith, Ilun trusts you more)"; }},
+      {label:"Ask if it can be undone (+ Faith, − Corruption, + Ilun trust)", run:s=>{ s.faith+=3; s.corruption-=3; adjustTrust(s,'ilun',3); return "Buried in the margins, Ilun finds something that might be useful — a method, half-described, for severing a bargain. (+3 faith, -3 corruption, Ilun trusts you more)"; }},
+      {label:"Tell him to stop digging into this (− Faith, + Corruption, − Ilun trust)", run:s=>{ s.faith-=2; s.corruption+=2; adjustTrust(s,'ilun',-3); return "Ilun closes the book slowly, but you notice he doesn't put it away. (-2 faith, +2 corruption, Ilun trusts you less)"; }}
+    ]
+  },
+  {
+    id:'coldspireMercs', category:'generic', speaker:'rider',
+    title:"Mercenaries Without a War",
+    text:"A rider from the Coldspire Reaches arrives with an odd proposition. 'The Free Company's seen which way the wind's blowing, lord. Half their captains would rather take your coin than die defending a pass for people who don't pay on time.'",
+    choices:[
+      {label:"Offer better terms than their current employer (costs 20 Gold, + Soldiers)", run:s=>{
+        if(s.gold<20) return "There's no coin to make the offer properly. The rider shrugs and rides back north.";
+        s.gold-=20; s.soldiers+=3;
+        return "A handful of Free Company veterans quietly switch banners. They're professionals about it, at least. (-20 gold, +3 soldiers)";
+      }},
+      {label:"Decline — hired loyalty is worth what you pay for it (+ Faith)", run:s=>{ s.faith+=3; return "Korrath approves. 'Mercenaries who'll turn on their last employer will turn on you too, eventually.' (+3 faith)"; }}
+    ]
+  },
+  {
+    id:'saltmereSmugglers', category:'generic', speaker:'envoy',
+    title:"Smugglers' Tithe",
+    text:"An envoy from the Saltmere coast offers an arrangement: safe passage through Ashveil lands for the Drowned Fleet's smuggled goods, in exchange for a generous cut delivered quietly, no questions asked.",
+    choices:[
+      {label:"Take the cut (+ Gold, + Corruption)", run:s=>{ s.gold+=22; s.corruption+=4; return "Coin changes hands in a back room, and a little more of Ashveil Hold's business happens in shadows now. (+22 gold, +4 corruption)"; }},
+      {label:"Refuse and seize the next smuggling run instead (+ Gold, + Faith, weakens Saltmere slightly)", run:s=>{
+        s.gold+=10; s.faith+=3;
+        const t=s.territories.find(x=>x.id==='saltmere');
+        if(t && !t.conquered) t.garrison=Math.max(2,t.garrison-1);
+        return "Your soldiers intercept the goods directly instead. Less coin than the bribe would've offered, but cleaner. (+10 gold, +3 faith)";
+      }}
+    ]
+  },
+  {
+    id:'brackenfortSpies', category:'generic', speaker:'seris',
+    title:"Eyes in Brackenfort",
+    text:"Seris reports that Mavros has finally noticed her network operating inside his walls. 'He hasn't moved against them yet, my lord. That's either restraint or a trap, and I genuinely don't know which.'",
+    choices:[
+      {label:"Pull the agents out now, while you still can (+ Faith)", run:s=>{ s.faith+=2; return "A quiet extraction. Safer, if it costs you the eyes you had inside Brackenfort's walls. (+2 faith)"; }},
+      {label:"Let them stay — the risk is worth the intelligence (+ Gold, chance of losing agents)", run:s=>{
+        if(Math.random()<0.4){ s.faith-=3; return "It was a trap. Two of Seris's people don't report back. She takes it personally. (-3 faith)"; }
+        s.gold+=14; return "They stay, and the intelligence keeps flowing — for now. (+14 gold)";
+      }}
+    ]
+  },
+  {
+    id:'marshWhispers', category:'generic', speaker:'narrator',
+    title:"Whispers from the Sunken Marsh",
+    text:"Travelers report strange lights deep in the Sunken Marsh, far past where the Marsh-Mothers usually keep their rites. Brother Ilun has not slept properly in three nights.",
+    choices:[
+      {label:"Ask Ilun what's wrong (+ Faith, + Ilun trust)", run:s=>{ s.faith+=2; adjustTrust(s,'ilun',2); return "He admits, finally, that the lights feel like something testing whether anyone's still watching. Saying it out loud seems to help him more than you expected. (+2 faith, Ilun trusts you more)"; }},
+      {label:"Let him work through it alone (− Faith)", run:s=>{ s.faith-=1; return "He doesn't ask for help, and you don't offer it. Neither of you mentions it again, though it sits there anyway. (-1 faith)"; }}
+    ]
+  },
+  {
+    id:'highRoadToll', category:'generic', speaker:'merchant',
+    title:"The High Road Reopens",
+    text:"With the borderlands less hostile than they were a season ago, merchant caravans have started using the high road again for the first time in years. A toll-collector asks whether Ashveil wants a cut.",
+    choices:[
+      {label:"Levy a modest toll (+ Gold, ongoing)", run:s=>{ s.gold+=10; s.flags.tollRoad=true; return "A small fee per cart, collected fairly. The merchants grumble, but they keep coming. (+10 gold)"; }},
+      {label:"Keep the road free to encourage trade (+ Faith)", run:s=>{ s.faith+=4; return "Word spreads that Ashveil's roads are safer and cheaper than anyone else's. More caravans start choosing this route. (+4 faith)"; }}
+    ]
+  },
+  {
+    id:'soldierUnrest', category:'generic', speaker:'korrath',
+    title:"Murmurs in the Barracks",
+    text:"Korrath reports quiet unrest among the ranks — not mutiny, but the kind of tiredness that comes before it. 'They've been fighting a long campaign, lord. Even good soldiers need to believe it's going somewhere.'",
+    choices:[
+      {label:"Address the troops personally (+ Faith, + Korrath trust)", run:s=>{ s.faith+=5; adjustTrust(s,'korrath',2); return "You speak plainly about what's ahead, and what it's for. It's not a magic fix, but it helps. (+5 faith, Korrath trusts you more)"; }},
+      {label:"Order extra rations and let it pass (− Grain, + Faith)", run:s=>{ s.grain-=6; s.faith+=2; return "A fuller belly cures a great many minor grievances, at least for a while. (-6 grain, +2 faith)"; }}
+    ]
+  },
+  {
+    id:'corruptDream2', category:'generic', speaker:'unmaker',
+    title:"A Familiar Warmth",
+    text:"The violet light returns to the hearth uninvited, patient as ever. 'You've grown stronger since we last spoke,' the voice says, almost admiringly. 'Strange, isn't it, how much of that strength came from me.'",
+    choices:[
+      {label:"Acknowledge it and ask for nothing (+ Corruption slightly)", run:s=>{ s.corruption+=3; return "You say nothing, and the voice seems amused by your silence rather than discouraged by it. (+3 corruption)"; }},
+      {label:"Deny its claim outright (+ Faith, − Corruption, + Ilun trust)", run:s=>{ s.faith+=4; s.corruption-=4; adjustTrust(s,'ilun',2); return "'Whatever strength I have is mine,' you say, and for once you believe it. The violet light dims, sulking. (+4 faith, -4 corruption, Ilun trusts you more)"; }}
+    ]
+  },
+  {
+    id:'wanderingPriest', category:'generic', speaker:'stranger',
+    title:"A Wandering Priest",
+    text:"A priest of some forgotten order arrives at Ashveil Hold's gates, claiming to remember the old wards better than Brother Ilun himself. Ilun is, visibly, not thrilled about this.",
+    choices:[
+      {label:"Let them work together (+ Faith, + Ilun trust)", run:s=>{ s.faith+=4; adjustTrust(s,'ilun',1); return "After an awkward first day, the two of them find genuine common ground. Ilun seems lighter for having someone else who remembers. (+4 faith, Ilun trusts you slightly more)"; }},
+      {label:"Politely send the priest elsewhere (+ Ilun trust)", run:s=>{ adjustTrust(s,'ilun',3); return "Ilun doesn't say thank you, exactly, but his shoulders unclench for the first time in days. (Ilun trusts you more)"; }}
+    ]
+  },
+  {
+    id:'graingrowersGuild', category:'generic', speaker:'elder',
+    title:"The Graingrowers' Guild",
+    text:"Representatives from the scattered farming villages across Ashveil's reach have organized into something like a guild, and they want recognition — and a say in how grain levies are decided.",
+    choices:[
+      {label:"Recognize the guild formally (+ Faith, − Grain temporarily)", run:s=>{ s.faith+=6; s.grain-=5; return "It costs you some short-term flexibility, but the farmers trust a lord who negotiates rather than dictates. (+6 faith, -5 grain)"; }},
+      {label:"Politely decline — levies stay a matter of the crown (+ Grain, − Faith)", run:s=>{ s.grain+=6; s.faith-=3; return "The guild disbands, grumbling, but your storehouses stay fuller in the short term. (+6 grain, -3 faith)"; }}
+    ]
+  },
+  {
+    id:'oldMapFound', category:'generic', speaker:'seris',
+    title:"An Old Survey Map",
+    text:"Seris's people recover an old royal survey map from before the Hollowing, detailing roads and garrisons across the whole of Vaelmoor in far more detail than anything Ashveil currently has.",
+    choices:[
+      {label:"Use it to plan future campaigns (+ Gold, + Seris trust)", run:s=>{ s.gold+=12; adjustTrust(s,'seris',2); return "Seris cross-references it against current intelligence for hours, visibly delighted by the find. (+12 gold, Seris trusts you more)"; }},
+      {label:"Donate it to Brother Ilun's archive instead (+ Faith, − Corruption)", run:s=>{ s.faith+=3; s.corruption-=2; return "Ilun catalogues it carefully alongside the rest of what's left of the old kingdom's memory. (+3 faith, -2 corruption)"; }}
+    ]
+  },
+  {
+    id:'refugeeCraftsmen', category:'generic', speaker:'narrator',
+    title:"Refugee Craftsmen",
+    text:"A group of skilled craftsmen, displaced by the fighting along your frontier, ask to settle within Ashveil Hold's walls in exchange for their trade.",
+    choices:[
+      {label:"Welcome them (costs 8 Gold, + Faith, ongoing economy boost)", run:s=>{
+        if(s.gold<8){ s.faith+=2; return "There's little to offer them, but they settle anyway, grateful for simple safety. (+2 faith)"; }
+        s.gold-=8; s.faith+=4; s.flags.craftsmenSettled=true;
+        return "Workshops spring up along the inner wall within weeks. Ashveil Hold looks a little more like a real capital. (-8 gold, +4 faith)";
+      }},
+      {label:"Turn them toward Dunmar Reach's fields instead (+ Grain)", run:s=>{ s.grain+=8; return "Fewer hands in the Hold itself, but a needed boost to the harvest in the lowlands. (+8 grain)"; }}
+    ]
+  },
+  {
+    id:'embassyAttempt', category:'generic', speaker:'herald',
+    title:"An Embassy to Nowhere",
+    text:"A herald arrives proposing a grand council of all Vaelmoor's warring factions to discuss a truce. Korrath thinks it's naive. Seris thinks it's a trap. Ilun thinks it's worth trying anyway.",
+    choices:[
+      {label:"Attend the council (+ Faith, chance of a useful alliance)", run:s=>{
+        if(Math.random()<0.45){ s.faith+=3; s.gold+=10; return "Nothing binding comes of it, but one faction quietly offers trade terms afterward. (+3 faith, +10 gold)"; }
+        s.faith+=2; return "It accomplishes little beyond proving everyone still hates each other, but at least no one started a war over it. (+2 faith)";
+      }},
+      {label:"Decline — councils are how Brackenfort buys time (+ Korrath trust)", run:s=>{ adjustTrust(s,'korrath',2); return "Korrath nods approvingly. 'Smart. Mavros loves a good stalling tactic.' (Korrath trusts you more)"; }}
+    ]
+  },
+  {
+    id:'ashveilMarket2', category:'generic', speaker:'merchant',
+    title:"Ashveil's Growing Market",
+    text:"As your holdings expand, so does Ashveil Hold's market square — new stalls, new faces, new goods from territories that used to be enemy ground entirely.",
+    choices:[
+      {label:"Tax the new trade lightly (+ Gold)", run:s=>{ s.gold+=Math.min(25, 8+conqueredCount(s)*2); return "The market's growth translates directly into the treasury, slowly but steadily. (+gold scaled to your holdings)"; }},
+      {label:"Leave it untaxed to encourage growth (+ Faith)", run:s=>{ s.faith+=4; return "The market thrives even faster without a crown's hand in every transaction. (+4 faith)"; }}
+    ]
+  },
+  {
+    id:'frosthBoldRaid', category:'generic',
+    condition: s=>{ const t=s.territories.find(x=>x.id==='frosthold'); return t && !t.conquered; },
+    speaker:'watchcaptain',
+    title:"Raiders from Frosthold",
+    text:"A small Free Company raiding party tests Ashveil's mountain border, probing for weaknesses before retreating back toward Frosthold. No real harm done, but the message is clear: they know you're coming eventually.",
+    choices:[
+      {label:"Reinforce the mountain watch (costs 10 Gold, + Faith)", run:s=>{
+        if(s.gold<10){ s.faith+=1; return "No coin to spare, but the watch doubles its vigilance anyway. (+1 faith)"; }
+        s.gold-=10; s.faith+=3; return "Extra patrols make the next raid, if there is one, considerably more expensive for them. (-10 gold, +3 faith)";
+      }},
+      {label:"Let Korrath handle the response personally (+ Korrath trust)", run:s=>{ adjustTrust(s,'korrath',2); return "She rides out herself, and the raiders don't come back for a long while. (Korrath trusts you more)"; }}
+    ]
+  },
+
+  /* ===================== BRANCH / FOLLOW-UP EVENTS ===================== */
+  {
+    id:'refugeesFollowup', category:'branch', speaker:'narrator',
+    title:"Those Who Remembered the Road",
+    text:"The refugees you sheltered have found their footing within Ashveil's walls. A handful of the younger ones, hardened by what they saw at Dunmar, ask to be armed. 'We know that road better than your scouts ever could,' one says.",
+    choices:[
+      {label:"Arm them and let them fight (+ Soldiers)", run:s=>{ s.soldiers+=3; return "They take up old spears with the grim determination of people who have nothing left to lose. (+3 soldiers)"; }},
+      {label:"Let them rebuild instead (+ Grain, + Faith)", run:s=>{ s.grain+=8; s.faith+=3; return "Within weeks, fields that had gone fallow are green again. (+8 grain, +3 faith)"; }}
+    ]
+  },
+  {
+    id:'refugeesColdShoulder', category:'branch', speaker:'seris',
+    title:"Word of a Hard Lord",
+    text:"Seris brings grim news. 'The refugees we turned away made it to Brackenfort instead, my lord. Duke Mavros took them in — and took their stories about us with them.'",
+    choices:[
+      {label:"Send word of apology and aid after the fact (costs 10 Gold, + Faith, + Seris trust)", run:s=>{
+        if(s.gold<10) return "There's nothing to send. The story spreads regardless.";
+        s.gold-=10; s.faith+=3; adjustTrust(s,'seris',2);
+        return "A late gesture, but not nothing. A few of the old grievances soften. (-10 gold, +3 faith, Seris trusts you more)";
+      }},
+      {label:"Let it be — we made our choice (Brackenfort's garrison strengthens)", run:s=>{
+        const t=s.territories.find(x=>x.id==='brackenfort');
+        t.garrison+=1;
+        return "Mavros gains a little more goodwill among the displaced — and a little more manpower for it. (Brackenfort's garrison strengthens)";
+      }}
+    ]
+  },
+  {
+    id:'drillyardFollowup', category:'branch', speaker:'korrath',
+    title:"The Drillyard Toll",
+    text:"One of the recruits collapses during drills the next morning — exhaustion, the surgeon says, nothing worse. Korrath stands over him a long moment before barking at the others to keep moving.",
+    choices:[
+      {label:"Ease the pace — they've proven themselves (+ Faith)", run:s=>{ s.faith+=4; return "The recruits notice the change immediately, and so does Korrath, though she'll never say so. (+4 faith)"; }},
+      {label:"The kingdom won't wait for them to recover (+ Soldiers, − Faith)", run:s=>{ s.soldiers+=1; s.faith-=2; return "The drills continue. By the week's end, the survivors are leaner, harder, and quieter than before. (+1 soldier, -2 faith)"; }}
+    ]
+  },
+  {
+    id:'korrathGratitude', category:'branch', speaker:'korrath',
+    title:"Korrath's Gratitude",
+    text:"Korrath finds you later, gruffly grateful. 'The men talk, you know. Word's gotten round that Ashveil's lord doesn't grind soldiers into the dirt for sport. We've had three new volunteers since.'",
+    choices:[
+      {label:"Welcome them properly (+ Soldiers, − Grain)", run:s=>{ s.soldiers+=2; s.grain-=3; return "A small feast for the new arrivals costs you some stores, but morale is worth more tonight. (+2 soldiers, -3 grain)"; }},
+      {label:"Quietly note their names for later (+ Faith)", run:s=>{ s.faith+=2; return "No fuss, no feast — just a name in Korrath's ledger and a nod of welcome. (+2 faith)"; }}
+    ]
+  },
+  {
+    id:'whisperReturns', category:'branch', speaker:'unmaker',
+    title:"The Whisper Returns",
+    text:"The hearth burns violet again on a night you didn't expect it. 'You liked that, didn't you,' the voice says, almost fond. 'There's more. There's always more. All you need do is ask.'",
+    choices:[
+      {label:"Ask for more (+ Gold, + Soldiers, +++ Corruption, −− Ilun trust)", run:s=>{
+        s.gold+=25; s.soldiers+=4; s.corruption+=20; adjustTrust(s,'ilun',-6);
+        return "The warmth this time is less like honey and more like a hand closing around yours. It does not let go right away. (+25 gold, +4 soldiers, +20 corruption, Ilun trusts you far less)";
+      }},
+      {label:"Say nothing at all (+ Faith, + Ilun trust)", run:s=>{ s.faith+=2; adjustTrust(s,'ilun',3); return "You sit in silence until the violet light gives up and fades on its own. It feels like the first thing you've won outright. (+2 faith, Ilun trusts you more)"; }}
+    ]
+  },
+  {
+    id:'ilunWard', category:'branch', speaker:'ilun',
+    title:"Brother Ilun's Working",
+    text:"Ilun spends three sleepless nights tracing wards in chalk and ash around Ashveil Hold's hearth-rooms. When he's done, he looks ten years older — but the violet light hasn't returned since. 'It will not stop what's in the Wastes,' he warns, 'but it may slow what reaches for you here.'",
+    choices:[
+      {label:"Thank him and let him rest (+ Faith)", run:s=>{ s.faith+=5; s.flags.wardProtected=true; return "He sleeps for a full day afterward. Ashveil Hold feels, for the first time in a while, simply like a home. (+5 faith — the Hold is warded)"; }},
+      {label:"Ask him to ward the barracks too (costs 15 Gold, + Faith more, + Ilun trust)", run:s=>{
+        if(s.gold<15){ s.faith+=5; s.flags.wardProtected=true; return "There's no coin for more chalk and oils, but he's done enough already — the Hold itself is warded. (+5 faith — the Hold is warded)"; }
+        s.gold-=15; s.faith+=8; adjustTrust(s,'ilun',2); s.flags.wardProtected=true;
+        return "He grumbles about the extra work, but obliges. The soldiers sleep easier without knowing quite why. (-15 gold, +8 faith — the Hold is warded, Ilun trusts you more)";
+      }}
+    ]
+  },
+  {
+    id:'gateAjar', category:'branch', speaker:'seris',
+    title:"The Gate Left Ajar",
+    text:"Seris confirms it: the bribed gatekeeper at Brackenfort still owes you a debt, and the eastern gate remains lightly watched — for now. 'This won't last forever, my lord. Whenever you march on Brackenfort, it should be soon.'",
+    choices:[
+      {label:"Keep the secret close and prepare (+ Faith)", run:s=>{ s.faith+=2; s.flags.brackenfortWeak=true; return "You say nothing to anyone but Seris and Korrath. The opportunity waits, quietly, for when you need it. (+2 faith — Brackenfort's gate remains weak for your next assault)"; }},
+      {label:"Have Seris widen the opening further (costs 10 Gold, + Seris trust)", run:s=>{
+        if(s.gold<10){ s.flags.brackenfortWeak=true; return "There's no coin to spare for it, but the gate remains compromised regardless. (Brackenfort's gate remains weak for your next assault)"; }
+        s.gold-=10; adjustTrust(s,'seris',2); s.flags.brackenfortWeak=true;
+        return "A little more gold buys a little more carelessness from the night watch. (-10 gold — Brackenfort's gate remains weak, Seris trusts you more)";
+      }}
+    ]
+  },
+  {
+    id:'serisNetwork', category:'branch', speaker:'seris',
+    title:"Seris's Network Grows",
+    text:"Word of how you handled the would-be defector spreads. Within days, two more informants quietly offer their services to Seris — people who'd rather work with a lord who doesn't reward betrayal. 'It's a slower kind of leverage,' Seris says, 'but a sturdier one.'",
+    choices:[
+      {label:"Put the new informants to work immediately (+ Gold)", run:s=>{ s.gold+=6; s.flags.serisTrustNetwork=true; return "Small payments for small secrets — but the secrets add up. (+6 gold — Seris's network will improve future parleys)"; }},
+      {label:"Have them wait and watch for now (+ Faith)", run:s=>{ s.faith+=3; s.flags.serisTrustNetwork=true; return "Patience, Seris says, is the only currency spies truly respect. (+3 faith — Seris's network will improve future parleys)"; }}
+    ]
+  },
+  {
+    id:'saltmereRetaliation', category:'branch', speaker:'korrath',
+    title:"Saltmere Strikes Back",
+    text:"Saltmere's pirates, humiliated by the storm and your scouts both, send a raiding party against your coastal foragers in the night. Korrath's patrol catches most of them — but not before damage is done.",
+    choices:[
+      {label:"Reinforce the coastal watch (costs 10 Gold, lessens losses)", run:s=>{
+        if(s.gold<10){ s.soldiers-=2; s.gold=Math.max(0,s.gold-4); return "There's no coin for reinforcements. The raid costs you more than it should have. (-2 soldiers, -4 gold)"; }
+        s.gold-=10; s.soldiers-=1;
+        return "The extra patrols arrive just in time to blunt the worst of it. (-10 gold, -1 soldier)";
+      }},
+      {label:"Let Korrath handle it her way (+ Faith, − Soldiers, − Gold, + Korrath trust)", run:s=>{
+        s.soldiers-=2; s.gold=Math.max(0,s.gold-4); s.faith+=2; adjustTrust(s,'korrath',2);
+        return "Korrath's response is decisive, if costly. The men respect decisive. (-2 soldiers, -4 gold, +2 faith, Korrath trusts you more)";
+      }}
+    ]
+  },
+  {
+    id:'saltmereGift', category:'branch', speaker:'envoy',
+    title:"A Pirate's Courtesy",
+    text:"An envoy from Saltmere arrives, oddly courteous for a pirate. 'The captains remember mercy, lord — rarer than gold, these days. A token, in thanks.' He leaves behind a small chest.",
+    choices:[
+      {label:"Accept the gift (+ Gold)", run:s=>{ s.gold+=15; return "The chest is heavier than it looks — old coin, mostly, from ships that never made it home. (+15 gold)"; }},
+      {label:"Accept, but send something back in kind (+ Gold, + Faith)", run:s=>{ s.gold+=8; s.faith+=3; return "A gesture returned is a debt remembered — by both sides. (+8 gold, +3 faith)"; }}
+    ]
+  },
+  {
+    id:'marshPriceRises', category:'branch', speaker:'marshmother',
+    title:"The Marsh-Mothers' Price Rises",
+    text:"The Marsh-Mothers send word again, this time less like a request and more like an expectation. 'The bargain holds both ways, ember-king. We will need... a little more, soon.' Brother Ilun has stopped meeting your eyes entirely.",
+    choices:[
+      {label:"Hold the line — honor what's already given (+ Faith, + Corruption)", run:s=>{ s.faith+=2; s.corruption+=3; return "You give them nothing new, but you don't take back what's already been promised either. The unease lingers. (+2 faith, +3 corruption)"; }},
+      {label:"Break the bargain now (− Faith, − Corruption, Marsh garrison rebuilds, + Ilun trust)", run:s=>{
+        s.faith-=4; s.corruption-=6; adjustTrust(s,'ilun',4);
+        const t=s.territories.find(x=>x.id==='marsh');
+        t.garrison+=3;
+        return "You sever it outright. The fungus-light along the marsh's edge goes dark, and so, a little, does the violet in the hearth. Ilun looks at you like he's seeing you clearly for the first time in weeks. (-4 faith, -6 corruption, Marsh's garrison rebuilds, Ilun trusts you more)";
+      }}
+    ]
+  },
+  {
+    id:'marshStirs', category:'branch', speaker:'korrath',
+    title:"The Marsh Stirs",
+    text:"Something from the Sunken Marsh tests Ashveil's borders in the night — not an army, just a handful of pale shapes that don't behave like ordinary raiders. Korrath's patrol drives them off, but two soldiers won't speak about what they saw.",
+    choices:[
+      {label:"Have Ilun bless the patrol and move on (+ Faith, − Corruption, + Ilun trust)", run:s=>{ s.faith+=4; s.corruption-=1; adjustTrust(s,'ilun',2); return "Ilun says the old words over the shaken soldiers, and whatever they saw seems to loosen its grip a little. (+4 faith, -1 corruption, Ilun trusts you more)"; }},
+      {label:"Press the survivors for details (+ Faith, + Corruption)", run:s=>{ s.corruption+=2; s.faith+=2; return "What they describe doesn't make sense, but it's useful all the same — Korrath adjusts the patrol routes accordingly. (+2 faith, +2 corruption)"; }}
+    ]
+  },
+  {
+    id:'grumbling', category:'branch', speaker:'seris',
+    title:"Grumbling in the Ranks",
+    text:"The rationing holds, but the grumbling Seris warned of hasn't faded — if anything, it's organizing. 'Nothing dangerous yet, my lord. Just... tired people, talking.'",
+    choices:[
+      {label:"Address them yourself — explain the situation plainly (+ Faith)", run:s=>{ s.faith+=5; return "You speak to the gathered households directly. It's not much, but being heard rarely is, and it helps anyway. (+5 faith)"; }},
+      {label:"Have Seris identify the loudest voices (+ Faith, + Corruption, − Seris trust)", run:s=>{ s.corruption+=2; s.faith+=2; adjustTrust(s,'seris',-2); return "A few quiet conversations later, the loudest complaints simply stop. Seris does the work without comment, but you sense she doesn't love this particular job. (+2 faith, +2 corruption, Seris trusts you less)"; }}
+    ]
+  },
+  {
+    id:'villageRises', category:'branch', speaker:'korrath',
+    title:"A Village Rises",
+    text:"One of the requisitioned villages has barred its gates to your tax collectors and armed itself with farm tools. Korrath awaits your order. 'It's not a rebellion yet,' she says carefully. 'But it could become one.'",
+    choices:[
+      {label:"Send grain back and apologize (− Grain, + Faith, − Corruption, + Korrath trust)", run:s=>{ s.grain-=8; s.faith+=5; s.corruption-=3; adjustTrust(s,'korrath',3); return "The grain carts return, and so, slowly, does the village's trust. Korrath looks relieved not to have to do this the other way. (-8 grain, +5 faith, -3 corruption, Korrath trusts you more)"; }},
+      {label:"Make an example so others don't follow (+ Soldiers, −− Faith, ++ Corruption, −− Korrath trust)", run:s=>{ s.soldiers+=1; s.faith-=6; s.corruption+=6; adjustTrust(s,'korrath',-6); return "Order is restored. Korrath carries out the order without comment, and without meeting your eyes afterward. (+1 soldier, -6 faith, +6 corruption, Korrath trusts you much less)"; }}
+    ]
+  },
+  {
+    id:'steelResolve', category:'branch', speaker:'korrath',
+    title:"Steel Resolve",
+    text:"Korrath reports the men have started training differently — harder, quieter, more deliberate. 'Knowing what's really out there changed something in them,' she says. 'Not fear, exactly. Resolve.'",
+    choices:[
+      {label:"Reward their dedication (costs 10 Gold, + Faith, + Soldiers)", run:s=>{
+        if(s.gold<10){ s.faith+=3; return "There's no coin for rewards, but Korrath passes along your thanks anyway. (+3 faith)"; }
+        s.gold-=10; s.faith+=3; s.soldiers+=2;
+        return "A small ceremony, extra rations, and the quiet kind of pride that doesn't need an audience. (-10 gold, +3 faith, +2 soldiers)";
+      }},
+      {label:"Let their resolve speak for itself (+ Faith)", run:s=>{ s.faith+=4; return "Sometimes the best response to quiet dedication is to simply let it continue undisturbed. (+4 faith)"; }}
+    ]
+  },
+  {
+    id:'cracksInStory', category:'branch', speaker:'seris',
+    title:"Cracks in the Story",
+    text:"Seris brings bad news quietly. 'Someone's been asking questions, my lord — about what really happened to the old king. The story we gave the soldiers... it's starting to come apart.'",
+    choices:[
+      {label:"Get ahead of it — tell them more truth now (+ Faith, − Corruption, − Soldiers)", run:s=>{ s.faith+=4; s.corruption-=3; s.soldiers-=1; return "A handful desert when they hear the fuller truth — but those who stay, stay for good reason now. (+4 faith, -3 corruption, -1 soldier)"; }},
+      {label:"Silence the rumor at its source (− Faith, + Corruption, − Seris trust)", run:s=>{ s.faith-=4; s.corruption+=4; adjustTrust(s,'seris',-3); return "The questions stop. So does some of the trust that used to come with honest answers — Seris included. (-4 faith, +4 corruption, Seris trusts you less)"; }}
+    ]
+  },
+  {
+    id:'executionerShadow', category:'branch', speaker:'seris',
+    title:"The Executioner's Shadow",
+    text:"The execution bought order, but it bought something else too — Brackenfort's heralds have started calling you 'the Butcher of Ashveil' in their taverns. Seris reports it without comment, but watches your reaction carefully.",
+    choices:[
+      {label:"Let them talk (+ Soldiers, + Corruption)", run:s=>{ s.soldiers+=1; s.corruption+=3; return "Fear of you spreads a little further than the name was meant to travel. It's not comfortable, but it's useful. (+1 soldier, +3 corruption)"; }},
+      {label:"Send word disputing the name (costs 10 Gold, + Faith)", run:s=>{
+        if(s.gold<10){ s.faith+=2; return "There's no coin for couriers, but you make a point of being seen differently around Ashveil itself, at least. (+2 faith)"; }
+        s.gold-=10; s.faith+=4;
+        return "It won't undo the name entirely, but it's something — and your own people seem to appreciate the effort. (-10 gold, +4 faith)";
+      }}
+    ]
+  },
+  {
+    id:'unlikelyReturn', category:'branch', speaker:'stranger',
+    title:"An Unlikely Return",
+    text:"The scullion you exiled returns months later, thinner and scarred, asking to speak with you alone. 'I know I don't deserve it,' he says, 'but I've seen things in the Hollow camps. Things you should know.'",
+    choices:[
+      {label:"Hear him out (+ Gold, + Faith)", run:s=>{ s.gold+=10; s.faith+=3; return "What he describes is unsettling, but accurate — and useful. Mercy, it seems, occasionally pays interest. (+10 gold, +3 faith)"; }},
+      {label:"Turn him away again (− Faith)", run:s=>{ s.faith-=2; return "He nods, as if he expected this, and disappears back into the dark without protest. (-2 faith)"; }}
+    ]
+  },
+  {
+    id:'wardTakesHold', category:'branch', speaker:'ilun',
+    title:"The Ward Takes Hold",
+    text:"The ward-words Ilun taught you settle into something like habit — a phrase murmured before sleep, a gesture made without thinking. Ilun notices. 'It's working,' he says, surprised and relieved in equal measure.",
+    choices:[
+      {label:"Teach the wards to others too (costs 5 Gold, + Faith, − Corruption)", run:s=>{
+        if(s.gold<5){ s.faith+=3; s.corruption-=2; return "No coin for materials, but Ilun teaches what he can by memory alone. (+3 faith, -2 corruption)"; }
+        s.gold-=5; s.faith+=5; s.corruption-=4;
+        return "A small ritual becomes a shared one. Ashveil Hold feels a little less alone in the dark. (-5 gold, +5 faith, -4 corruption)";
+      }},
+      {label:"Keep this between the two of you (+ Faith, − Corruption, + Ilun trust)", run:s=>{ s.faith+=2; s.corruption-=2; adjustTrust(s,'ilun',2); return "Some things are sturdier kept quiet. You and Ilun share a small, private relief. (+2 faith, -2 corruption, Ilun trusts you more)"; }}
+    ]
+  },
+  {
+    id:'dreamDeepens', category:'branch', speaker:'ilun',
+    title:"The Dream Deepens",
+    text:"The dreams haven't stopped — if anything, they've gotten more vivid, more familiar, like a room you're starting to recognize. Ilun finds you afterward, careful not to ask, but watching you in a way he didn't used to.",
+    choices:[
+      {label:"Tell him the truth this time (+ Faith, − Corruption, + Ilun trust)", run:s=>{ s.faith+=3; s.corruption-=3; adjustTrust(s,'ilun',3); return "He listens without judgment, and for the first time the dream doesn't feel like a secret anymore. (+3 faith, -3 corruption, Ilun trusts you more)"; }},
+      {label:"Brush it off again (+ Corruption, − Ilun trust)", run:s=>{ s.corruption+=5; adjustTrust(s,'ilun',-2); return "Ilun nods slowly and says nothing further. The crown-shaped mark on your wrist has stopped itching — you're not sure if that's better or worse. (+5 corruption, Ilun trusts you less)"; }}
+    ]
+  },
+  {
+    id:'mavrosBold', category:'branch', speaker:'seris',
+    title:"Mavros Grows Bold",
+    text:"Seris's informants report Mavros has used the peace to muster more men of his own — and worse, he's started putting out word that Ashveil 'answers to Brackenfort now.' The tithe grain keeps arriving, technically as agreed.",
+    choices:[
+      {label:"Send a sharp reminder of whose grain it actually is (+ Faith, Brackenfort's garrison strengthens)", run:s=>{
+        s.faith+=3;
+        const t=s.territories.find(x=>x.id==='brackenfort');
+        t.garrison+=1;
+        return "Your envoy is polite, brief, and unmistakable. Mavros's response is to fortify a little further. (+3 faith, Brackenfort's garrison strengthens)";
+      }},
+      {label:"Ignore the posturing — grain is grain (+ Grain, Brackenfort's garrison strengthens more)", run:s=>{
+        s.grain+=6;
+        const t=s.territories.find(x=>x.id==='brackenfort');
+        t.garrison+=2;
+        return "The grain is welcome. The rumors are not, but they cost nothing yet — and Mavros keeps building. (+6 grain, Brackenfort's garrison strengthens)";
+      }}
+    ]
+  },
+  {
+    id:'brackenfortPrepares', category:'branch', speaker:'korrath',
+    title:"Brackenfort Prepares for War",
+    text:"Korrath reports Brackenfort's walls have grown busier — more torches at night, more drills in the yard. 'He's not attacking,' she says, 'but he's not pretending anymore either. Whenever we move on him, it won't be a surprise.'",
+    choices:[
+      {label:"Match his preparations (costs 12 Gold, + Faith)", run:s=>{
+        if(s.gold<12){ s.faith+=1; return "There's little to spare for drills, but the men train regardless, on principle. (+1 faith)"; }
+        s.gold-=12; s.faith+=3;
+        return "Ashveil Hold answers torch for torch. Neither side blinks first — yet. (-12 gold, +3 faith)";
+      }},
+      {label:"Let him spend himself preparing for nothing (+ Faith)", run:s=>{ s.faith+=2; return "Korrath allows herself a small, grim smile. 'Let him wear his men out on drills, then. We'll see who's tired when it matters.' (+2 faith)"; }}
+    ]
+  },
+  {
+    id:'vigilBlessing', category:'branch', speaker:'ilun',
+    title:"A Lighter Vigil",
+    text:"Ilun seems lighter after the long vigil — not happier, exactly, but steadier. 'The old wards remember being prayed to,' he says. 'It's been a long time since anyone bothered.'",
+    choices:[
+      {label:"Ask him to teach the vigil to the household (costs 5 Gold, + Faith)", run:s=>{
+        if(s.gold<5){ s.faith+=2; return "No coin for candles, but a few household members join the vigil regardless, by firelight alone. (+2 faith)"; }
+        s.gold-=5; s.faith+=4;
+        return "Candlelight spreads through Ashveil Hold each evening now — small, steady, and somehow enough. (-5 gold, +4 faith)";
+      }},
+      {label:"Let it remain between the two of you (+ Faith)", run:s=>{ s.faith+=2; return "Some comforts don't need to be shared to matter. (+2 faith)"; }}
+    ]
+  },
+  {
+    id:'vigilNeglect', category:'branch', speaker:'ilun',
+    title:"The Growing Distance",
+    text:"Ilun's small book has gotten thicker. He doesn't show you what's in it, but you catch him writing in it more often now — always after you've said something he didn't like.",
+    choices:[
+      {label:"Ask to see what he's been writing (+ Faith, − Corruption, + Ilun trust)", run:s=>{ s.faith+=3; s.corruption-=2; adjustTrust(s,'ilun',3); return "He hesitates, then shows you — mostly worries, some hopes, and your name, underlined, more than once. It clears something between you. (+3 faith, -2 corruption, Ilun trusts you more)"; }},
+      {label:"Leave him to it (+ Corruption, − Ilun trust)", run:s=>{ s.corruption+=2; adjustTrust(s,'ilun',-2); return "The book stays closed. The distance between you grows a little, in a way neither of you mentions. (+2 corruption, Ilun trusts you less)"; }}
+    ]
+  },
+
+  /* ===================== AFTERMATH EVENTS (on conquest) ===================== */
+  {
+    id:'dunmarAftermath', category:'aftermath', speaker:'seris',
+    title:"The Fields of Dunmar",
+    text:"Dunmar Reach is yours, and its freed thralls stand uncertainly in their own fields, unsure what 'free' means under a new lord. Seris asks how you'd like them settled.",
+    choices:[
+      {label:"Offer them a place in your ranks (+ Soldiers)", run:s=>{ s.soldiers+=4; return "Many take up arms gladly — they have scores of their own to settle with the Hollow King. (+4 soldiers)"; }},
+      {label:"Let them return to farming, under fairer terms (+ Grain, + Faith)", run:s=>{ s.grain+=10; s.faith+=4; return "The fields are tilled by people working for themselves for the first time in a decade. (+10 grain, +4 faith)"; }},
+      {label:"Leave them be — let them choose for themselves (+ Faith)", run:s=>{ s.faith+=7; return "No demands, no decrees — just the offer of safety, which is rarer than either side expected. (+7 faith)"; }}
+    ]
+  },
+  {
+    id:'greywoodAftermath', category:'aftermath', speaker:'korrath',
+    title:"Terms in the Greywood",
+    text:"The Greywood's bandit-lords, defeated, kneel before you with the particular dignity of people who've already started planning their next move. 'They're asking for terms,' Korrath says, clearly hoping you'll say no.",
+    choices:[
+      {label:"Recruit the best of them as scouts (+ Soldiers, + Corruption)", run:s=>{ s.soldiers+=3; s.corruption+=2; return "They're useful, ruthless, and loyal to whoever's currently winning — which, for now, is you. (+3 soldiers, +2 corruption)"; }},
+      {label:"Disband them and send them home (+ Faith, − Soldiers, + Korrath trust)", run:s=>{ s.faith+=4; s.soldiers-=1; adjustTrust(s,'korrath',2); return "Most go quietly. A few slip away into the trees rather than give up the only life they know. (+4 faith, -1 soldier, Korrath trusts you more)"; }},
+      {label:"Let them keep the woods, for tribute (+ Gold)", run:s=>{ s.gold+=15; return "An arrangement neither side loves, but both can live with — for now. (+15 gold)"; }}
+    ]
+  },
+  {
+    id:'coldspireAftermath', category:'aftermath', speaker:'seris',
+    title:"The Toll-House at Coldspire",
+    text:"Coldspire Pass is yours, and with it, the Free Company's old toll-house — and the mercenaries who ran it, currently standing around with nothing to guard. 'They're for hire, my lord,' Seris notes. 'Same as always. Just... for you, now.'",
+    choices:[
+      {label:"Hire them outright (costs 20 Gold for the best terms, + Soldiers)", run:s=>{
+        if(s.gold<20){ s.soldiers+=2; return "You can't afford their full price, but a handful sign on anyway, for less. (+2 soldiers)"; }
+        s.gold-=20; s.soldiers+=5;
+        return "The Free Company's banner changes color overnight — they've done this before, and seem entirely unbothered. (-20 gold, +5 soldiers)";
+      }},
+      {label:"Pay their severance and let them go (costs 15 Gold, + Faith)", run:s=>{
+        if(s.gold<15){ s.faith+=2; return "There's not enough to pay them off properly, but most leave anyway, professionally enough. (+2 faith)"; }
+        s.gold-=15; s.faith+=4;
+        return "A clean parting, as these things go. They march off whistling, already discussing their next contract. (-15 gold, +4 faith)";
+      }},
+      {label:"Take over the toll operation yourselves (+ Gold)", run:s=>{ s.gold+=12; return "The toll-house keeps running — just with your banner over the door now. (+12 gold)"; }}
+    ]
+  },
+  {
+    id:'saltmereAftermath', category:'aftermath', speaker:'korrath',
+    title:"The Black-Sailed Fleet",
+    text:"Saltmere Harbor's black-sailed fleet sits at anchor, leaderless, while its crews wait to see what kind of lord just took their home. Korrath eyes the ships like she's already counting cannons.",
+    choices:[
+      {label:"Keep the fleet as your own (+ Gold, + Corruption)", run:s=>{ s.gold+=15; s.corruption+=2; return "Pirates don't reform overnight, but they do reliably follow whoever pays them, and that's now you. (+15 gold, +2 corruption)"; }},
+      {label:"Burn the ships (+ Faith, − Gold)", run:s=>{ s.faith+=5; s.gold=Math.max(0,s.gold-5); return "The harbor lights up for a night. Whatever Saltmere was, it isn't anymore — and some of the locals seem glad of it. (+5 faith, -5 gold)"; }},
+      {label:"Let the crews sail off, ships and all (+ Faith)", run:s=>{ s.faith+=3; return "An odd mercy, but a clean one. The black sails vanish over the horizon by morning. (+3 faith)"; }}
+    ]
+  },
+  {
+    id:'brackenfortAftermath', category:'aftermath', speaker:'seris',
+    title:"The Duke's Fate",
+    text:"Brackenfort has fallen, but Duke Mavros himself is found alive, hiding in his own wine cellar. Seris brings him before you, bound, furious, and very obviously still expecting to talk his way out of this.",
+    choices:[
+      {label:"Execute him publicly (+ Corruption, − Faith, − Ilun trust)", run:s=>{ s.faith-=2; s.corruption+=8; adjustTrust(s,'ilun',-3); return "It is decisive. It is also, Ilun notes quietly afterward, exactly the kind of thing the Ember Wastes would approve of. (-2 faith, +8 corruption, Ilun trusts you less)"; }},
+      {label:"Exile him from Vaelmoor entirely (+ Faith)", run:s=>{ s.faith+=5; return "He's escorted to the border with nothing but his name — which, stripped of land and title, suddenly means very little. (+5 faith)"; }},
+      {label:"Offer him a place in your court, watched closely (+ Soldiers, + Corruption)", run:s=>{ s.soldiers+=3; s.corruption+=3; return "An uneasy arrangement — his loyalists fall in alongside yours, and everyone pretends not to notice the new guards posted near his rooms. (+3 soldiers, +3 corruption)"; }}
+    ]
+  },
+  {
+    id:'marshAftermath', category:'aftermath', speaker:'ilun',
+    title:"What Remains in the Marsh",
+    text:"The Sunken Marsh falls silent at last, but Ilun warns the silence isn't the same as peace. 'Whatever the Marsh-Mothers served still lives down in that water, lord. The question is only whether it still has worshippers.'",
+    choices:[
+      {label:"Have Ilun perform a cleansing rite (costs 15 Gold, − Corruption, + Faith, + Ilun trust)", run:s=>{
+        if(s.gold<15){ s.corruption-=4; s.faith+=2; return "A smaller rite than he'd like, without the proper offerings — but it's something. (-4 corruption, +2 faith)"; }
+        s.gold-=15; s.corruption-=8; s.faith+=4; adjustTrust(s,'ilun',2);
+        return "The rite takes all night. By dawn, the marsh smells like marsh again, instead of something else. (-15 gold, -8 corruption, +4 faith, Ilun trusts you more)";
+      }},
+      {label:"Burn the marsh (− Grain, − Corruption)", run:s=>{ s.grain-=10; s.corruption-=5; return "Fire reaches where soldiers can't. What's left of the marsh is ash and ruined farmland — but also, finally, just ash. (-10 grain, -5 corruption)"; }},
+      {label:"Leave it be and post a permanent watch (+ Faith)", run:s=>{ s.faith+=2; return "Some things are better left undisturbed, Ilun agrees — as long as someone's always watching. (+2 faith)"; }}
+    ]
+  },
+  {
+    id:'regionSecuredGeneric', category:'aftermath', speaker:'korrath',
+    title:"A Region Secured",
+    text:s=>`Korrath rolls up the campaign map with something almost like satisfaction. 'Every garrison in ${s.pendingRegionName||'the region'} now answers to Ashveil, lord. It won't hold itself, but it's ours.'`,
+    choices:[
+      {label:"Garrison the new territory properly (costs 20 Gold, + Faith, strengthens future defense)", run:s=>{
+        if(s.gold<20){ s.faith+=2; return "There's no coin for a proper garrison yet, but word of the victory still travels. (+2 faith)"; }
+        s.gold-=20; s.faith+=5; s.flags['secured_'+(s.pendingRegionName||'')]=true;
+        return "Permanent garrisons go up along the new border. The region, for now, is actually held — not just conquered. (-20 gold, +5 faith)";
+      }},
+      {label:"Move on immediately — there's no time to celebrate (+ Soldiers)", run:s=>{ s.soldiers+=2; return "Korrath doesn't argue, but you catch her allowing herself one tired exhale before turning back to the maps. (+2 soldiers)"; }}
+    ]
+  },
+  {
+    id:'footholdGeneric', category:'branch', speaker:'seris',
+    title:"A New Foothold",
+    text:s=>`Seris reviews the latest gains with her usual precision. 'A foothold, my lord, nothing more yet. The locals are still deciding whether to fear us or simply tolerate us. Either works, for now.'`,
+    choices:[
+      {label:"Send word of fair treatment ahead of your soldiers (+ Faith)", run:s=>{ s.faith+=3; return "A small gesture, but the kind that tends to outlast a single conquest. (+3 faith)"; }},
+      {label:"Let the garrison's reputation speak for itself (+ Soldiers)", run:s=>{ s.soldiers+=1; return "Fear is a cruder tool than goodwill, but it works just as well on a frightened populace. (+1 soldier)"; }}
+    ]
+  }
+];
+
+const EVENTS_BY_ID = {};
+EVENTS.forEach(e=>{ EVENTS_BY_ID[e.id]=e; });
+/* =====================================================
+   ASHES OF VAELMOOR — Speakers & Road Encounters
+   ===================================================== */
+
+// Non-companion speakers used by events/travel — gives every voice a name, role and color
+// without resorting to icons/emoji. Rendered as a colored initial-letter marker.
+const SPEAKERS = {
+  korrath:{name:'General Thessa Korrath', role:'Master of War', color:'#8a3232'},
+  seris:{name:'Lady Vyra Seris', role:'Spymaster', color:'#7a4ea3'},
+  ilun:{name:'Brother Ilun', role:'Keeper of Vigils', color:'#c79a47'},
+  unmaker:{name:'???', role:'A Voice in the Smoke', color:'#7a4ea3'},
+  narrator:{name:'The Chronicle', role:'', color:'#9a8a76'},
+  marshmother:{name:'A Marsh-Mother', role:'Cultist of the Unmaker', color:'#3a6a4a'},
+  herald:{name:'A Herald of Brackenfort', role:'Duke Mavros\u2019s Messenger', color:'#5a5a7a'},
+  watchcaptain:{name:'A Watch-Captain', role:'Ashveil Garrison', color:'#6a6a6a'},
+  rider:{name:'A Free Company Rider', role:'Mercenary Courier', color:'#7a6a4a'},
+  elder:{name:'A Village Elder', role:'', color:'#9a8a76'},
+  merchant:{name:'A Traveling Merchant', role:'', color:'#a07a40'},
+  envoy:{name:'A Drowned Fleet Envoy', role:'Saltmere Emissary', color:'#3a5a7a'},
+  stranger:{name:'A Hooded Stranger', role:'', color:'#6a6a6a'},
+  tilda:{name:'Tilda the Wanderer', role:'Itinerant Healer', color:'#9a8a76'},
+  mercer:{name:'Old Mercer', role:'Retired Soldier', color:'#7a7060'},
+  ashchild:{name:'The Ash-Marked Child', role:'???', color:'#7a4ea3'}
+};
+
+function speakerInfo(key){
+  return SPEAKERS[key] || {name:key, role:'', color:'#9a8a76'};
+}
+
+/* =====================================================
+   Road NPC encounters — tied to map pins, discoverable
+   through travel, and re-visitable once found.
+   ===================================================== */
+
+const ROAD_NPC_CONTENT = {
+  tilda:{
+    introTitle:"A Hooded Figure on the Road",
+    introText:"Your column passes a lone traveler crouched beside an injured deer, working with the calm of someone who's done this a thousand times. She doesn't look up as you approach. 'Sit if you're staying. Walk on if you're not. Either's fine by me.'",
+    talks:[
+      {label:"Ask why she walks alone",
+       text:"'Towns are slower to trust a healer who shows up after the fighting's already started,' Tilda says. 'The road doesn't ask questions. I prefer that.'"},
+      {label:"Ask what she's heard of the Ember Wastes",
+       text:"She goes quiet for a moment. 'I treated a man once who'd been close enough to see the throne. He didn't talk much afterward. Didn't need to — his hands shook every time the fire in a hearth got too bright.'"},
+      {label:"Offer her a place at Ashveil Hold",
+       run:s=>{ adjustTrust(s,'korrath',0); s.flags.tildaOffered=true; return "She considers it longer than you expect. 'Maybe. Walls make me nervous. But I'll remember the offer, ember-king.'"; }}
+    ],
+    favor:{
+      label:"Ask Tilda to tend your wounded (+ Soldiers)",
+      run:s=>{ s.soldiers+=2; return "She works quickly and without ceremony. A couple of soldiers thought lost to their wounds rejoin the ranks. (+2 soldiers)"; }
+    }
+  },
+  mercer:{
+    introTitle:"The Veteran of the Old Road",
+    introText:"An old man with one eye and a soldier's bearing waves your column down from beside a cairn of stones. 'Ashveil colors. Haven't seen those on this road in a long while. Mind if an old soldier walks with you a spell?'",
+    talks:[
+      {label:"Ask what he remembers of the Hollowing",
+       text:"'I was at the gates when the fire turned,' Mercer says, voice flat in the way of someone who's told this story enough times to wear the edges off it. 'Violet doesn't forget you once it's seen you. I still see it sometimes, in lamplight.'"},
+      {label:"Ask about your father",
+       text:"'King Aldous was a good man, before,' Mercer says carefully. 'I won't tell you what he was after. You'll see for yourself, eventually, and that's a kindness I can give you — not telling you first.'"},
+      {label:"Ask if he'd fight again",
+       run:s=>{ s.flags.mercerAsked=true; return "He laughs, short and humorless. 'Son, I've got one eye and a knee that complains in the rain. But I know things younger soldiers don't. That might be worth more than my sword arm these days.'"; }}
+    ],
+    favor:{
+      label:"Ask Mercer for tactical advice (weakens a random unconquered territory's garrison slightly)",
+      run:s=>{
+        const targets=s.territories.filter(t=>!t.conquered && !t.final);
+        if(targets.length===0) return "Mercer shrugs. 'Nothing left for me to tell you about, looks like. You've taken it all already.'";
+        const t=targets[Math.floor(Math.random()*targets.length)];
+        t.garrison=Math.max(2,t.garrison-1);
+        return `He draws a rough map in the dirt with his knife. 'Used to garrison near ${t.name} myself, years back. Their watch rotation has a gap — always has.' (${t.name}'s garrison weakened)`;
+      }
+    }
+  },
+  ashchild:{
+    introTitle:"The Child Who Shouldn't Be Here",
+    introText:"A child stands alone at the roadside, ash-smudged and entirely unbothered by an armed column passing within feet of them. No one can say afterward whose child it was, or where they went. Brother Ilun goes very still when he sees them.",
+    talks:[
+      {label:"Ask the child their name",
+       text:"They tilt their head, as if the question doesn't quite make sense to them. 'I don't think I have one anymore. I think it got left behind. Names are wards, you know. Brother Ilun says so.' They know things they shouldn't."},
+      {label:"Ask where they came from",
+       text:"'From the bright place,' they say, pointing, unprompted, directly toward the Ember Wastes. 'It isn't bright the way you mean. It's bright the way a wound is, when it's new.'"},
+      {label:"Have Ilun examine them (+ Faith, − Corruption)",
+       run:s=>{ s.faith+=3; s.corruption-=2; logButterfly(s,'ashchild',"Brother Ilun examined the Ash-Marked Child.","He wouldn't say afterward what he found, only that he slept with a candle lit that night."); return "Ilun murmurs an old working under his breath. Whatever he finds, he doesn't share it — but his hands are shaking afterward. (+3 faith, -2 corruption)"; }}
+    ],
+    favor:null // this NPC has no mechanical favor — pure lore/unease
+  }
+};
+/* =====================================================
+   ASHES OF VAELMOOR — Side Activities & Travel Encounters
+   ===================================================== */
+
+const SIDE_ACTIVITIES = {
+  training:{
+    label:"Train with the Garrison",
+    desc:"Spend an hour in the yard with the soldiers. Costs nothing, builds Faith.",
+    run:s=>{ s.faith+=3; return "You take up a blunted blade and spar with the recruits. They fight harder for a lord willing to bruise alongside them. (+3 faith)"; }
+  },
+  hunting:{
+    label:"Hunt the Borderlands",
+    desc:"A day spent hunting near Ashveil Hold. Modest grain gain.",
+    run:s=>{ const g=4+Math.floor(Math.random()*5); s.grain+=g; return `The hunt is good today. (+${g} grain)`; }
+  },
+  market:{
+    label:"Walk the Market Quarter",
+    desc:"Listen to what the smallfolk are actually saying. Small Faith gain.",
+    run:s=>{ s.faith+=2; return "You walk the stalls unannounced and hear, unfiltered, what your people actually think of you. Most of it is more hopeful than you expected. (+2 faith)"; }
+  },
+  study:{
+    label:"Study the Old Records",
+    desc:"Pore over Ashveil Hold's archives. Small Corruption reduction.",
+    run:s=>{ s.corruption=Math.max(0,s.corruption-2); return "Dust and old ink, but also old wisdom — the kind the Unmaker would rather you didn't have. (-2 corruption)"; }
+  }
+};
+
+const TRAVEL_ENCOUNTERS = [
+  { text:"A column of refugees crosses your path, fleeing some trouble further down the road. They eye your banners warily.",
+    choices:[
+      {label:"Share rations with them (− Grain, + Faith)", run:s=>{ s.grain-=4; s.faith+=3; return "Small comfort, freely given. They bless your name as they pass. (-4 grain, +3 faith)"; }},
+      {label:"Press on — your own people need you first (no change)", run:s=>{ return "You press on. The refugees watch your column disappear down the road without a word."; }}
+    ]},
+  { text:"Your scouts spot smoke rising from a homestead just off the road — too small to be an army, too large to be a cookfire.",
+    choices:[
+      {label:"Investigate (costs time, chance of soldiers)", run:s=>{
+        if(Math.random()<0.5){ s.soldiers+=1; return "A homestead, raided by bandits, with one survivor willing to take up arms once you're done burying the rest. (+1 soldier)"; }
+        s.soldiers-=1; return "Whatever did this is long gone. The smoke was the only answer you get, and it costs you a soldier to a stray trap left behind. (-1 soldier)";
+      }},
+      {label:"Keep moving — not every fire is yours to put out", run:s=>{ s.faith-=1; return "You keep the column moving. Something about leaving it unanswered sits uneasily with the men. (-1 faith)"; }}
+    ]},
+  { text:"A toll-bridge keeper, independent of any of the great territories, blocks your path with an outstretched hand.",
+    choices:[
+      {label:"Pay the toll (costs 6 Gold)", run:s=>{ if(s.gold<6){ return "You've nothing to pay with. The keeper shrugs and waves you through anyway, muttering about lords with empty pockets."; } s.gold-=6; return "A small toll, paid without complaint. (-6 gold)"; }},
+      {label:"Have your soldiers simply walk through", run:s=>{ s.faith-=1; return "The keeper backs away from several hundred armed soldiers with admirable speed. The crossing is free, but word of it won't help your reputation. (-1 faith)"; }}
+    ]},
+  { text:"The weather turns foul without warning — a cold rain that soaks through everything within minutes.",
+    choices:[
+      {label:"Push through the storm (− Soldiers slightly)", run:s=>{ s.soldiers=Math.max(0,s.soldiers-1); return "A miserable, sodden march, but you keep your pace. (-1 soldier)"; }},
+      {label:"Make camp early and wait it out (loses a little time, + Faith)", run:s=>{ s.faith+=2; return "You order an early camp. The men are grateful for a lord who doesn't march them through a downpour for pride's sake. (+2 faith)"; }}
+    ]},
+  { text:"You pass the rusted wreck of an old battlefield — armor and broken spears half-swallowed by grass, decades old.",
+    choices:[
+      {label:"Have the column pay respects (+ Faith)", run:s=>{ s.faith+=3; return "A brief, unscheduled silence falls over the marching column. It costs nothing and means more than expected. (+3 faith)"; }},
+      {label:"Scavenge what's usable (+ Gold)", run:s=>{ s.gold+=8; return "Old steel still fetches a price, however it was won. (+8 gold)"; }}
+    ]},
+  { text:"A traveling storyteller falls in alongside your column for a stretch of road, trading tales for company.",
+    choices:[
+      {label:"Listen to her stories of the old kingdom (+ Faith)", run:s=>{ s.faith+=4; return "Stories of Vaelmoor before the Hollowing remind the soldiers what they're actually fighting to rebuild. (+4 faith)"; }},
+      {label:"Ask what people say about you specifically (+ Faith or − Faith, randomly)", run:s=>{
+        if(Math.random()<0.6){ s.faith+=3; return "'They say you might actually be different,' she admits. 'Cautiously. Smallfolk don't trust easily, lord, but they're starting to.' (+3 faith)"; }
+        s.faith-=2; return "'Some say you're no different from your father, before,' she says, not unkindly. The words sit with you longer than you'd like. (-2 faith)";
+      }}
+    ]},
+  { text:"A border shrine, neither grand nor especially old, sits untended at a fork in the road.",
+    choices:[
+      {label:"Leave an offering (costs 5 Gold, + Faith)", run:s=>{ if(s.gold<5){ s.faith+=1; return "You've nothing to leave but a quiet moment's respect, which still seems to count for something. (+1 faith)"; } s.gold-=5; s.faith+=4; return "A small offering, freely given. The shrine looks a little less forgotten for it. (-5 gold, +4 faith)"; }},
+      {label:"Press on without stopping", run:s=>{ return "The shrine passes by, untouched, same as it's been for years."; }}
+    ]},
+  { text:"Your column startles a pack of wild dogs feeding at a carcass near the road. They scatter — mostly.",
+    choices:[
+      {label:"Let the soldiers hunt for sport (+ Soldiers morale via Faith)", run:s=>{ s.faith+=1; return "A brief, harmless chase lifts the mood of an otherwise grim march. (+1 faith)"; }},
+      {label:"Keep the column moving, ignore them", run:s=>{ return "The dogs are forgotten within the hour."; }}
+    ]}
+];
+/* =====================================================
+   ASHES OF VAELMOOR — The Map
+   Hand-rendered SVG. No emoji; every icon is line art.
+   ===================================================== */
+
+// Returns a small inline SVG icon (line-art, currentColor) for a territory "kind".
+function terrainIcon(kind, cx, cy, scale){
+  scale = scale || 1;
+  const s = scale;
+  switch(kind){
+    case 'farmland':
+      return `<g transform="translate(${cx},${cy}) scale(${s})" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round">
+        <path d="M -9 6 L -9 -2 L -5 -6 L -1 -2 L -1 6"/>
+        <path d="M 1 6 L 1 -1 L 5 -5 L 9 -1 L 9 6"/>
+        <line x1="-11" y1="6" x2="11" y2="6"/>
+      </g>`;
+    case 'forest':
+      return `<g transform="translate(${cx},${cy}) scale(${s})" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round">
+        <path d="M 0 -9 L -5 -1 L -2 -1 L -7 6 L 7 6 L 2 -1 L 5 -1 Z"/>
+        <line x1="0" y1="6" x2="0" y2="9" stroke-linecap="round"/>
+      </g>`;
+    case 'mountain':
+      return `<g transform="translate(${cx},${cy}) scale(${s})" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round">
+        <path d="M -10 6 L -3 -7 L 2 -1 L 5 -5 L 10 6 Z"/>
+        <path d="M -1 -3 L 1 0 L -2.5 0 Z" fill="currentColor" stroke="none"/>
+      </g>`;
+    case 'coast':
+      return `<g transform="translate(${cx},${cy}) scale(${s})" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round">
+        <path d="M -9 2 Q -9 -7 -1 -7 Q 7 -7 7 1 L 7 6 L -9 6 Z"/>
+        <line x1="-1" y1="-7" x2="-1" y2="-11"/>
+        <path d="M -2 -11 L 3 -9.5 L -2 -8 Z" fill="currentColor" stroke="none"/>
+        <path d="M -11 8 Q -7 6 -3 8 Q 1 10 5 8 Q 8 6.5 11 8" stroke-width="1"/>
+      </g>`;
+    case 'keep':
+      return `<g transform="translate(${cx},${cy}) scale(${s})" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round">
+        <path d="M -8 7 L -8 -2 L -8 -5 L -5 -5 L -5 -3 L -2.5 -3 L -2.5 -5 L 2.5 -5 L 2.5 -3 L 5 -3 L 5 -5 L 8 -5 L 8 -2 L 8 7 Z"/>
+        <line x1="-8" y1="-2" x2="8" y2="-2"/>
+        <rect x="-1.5" y="1" width="3" height="6" />
+      </g>`;
+    case 'marsh':
+      return `<g transform="translate(${cx},${cy}) scale(${s})" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round">
+        <path d="M -9 7 Q -5 1 -9 -5"/>
+        <path d="M 0 7 Q 4 1 0 -5"/>
+        <path d="M 9 7 Q 5 1 9 -5"/>
+        <line x1="-11" y1="7" x2="11" y2="7"/>
+      </g>`;
+    case 'ruin':
+      return `<g transform="translate(${cx},${cy}) scale(${s})" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round">
+        <path d="M -9 7 L -9 -1 L -6 -6 L -3 -1 L -3 3 L 1 -2 L 4 3 L 4 -3 L 7 1 L 9 7 Z"/>
+        <line x1="-11" y1="7" x2="11" y2="7"/>
+      </g>`;
+    case 'hold':
+      return `<g transform="translate(${cx},${cy}) scale(${s})" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round">
+        <path d="M -10 8 L -10 -1 L -10 -5 L -6.5 -5 L -6.5 -2.5 L -3.5 -2.5 L -3.5 -5 L 3.5 -5 L 3.5 -2.5 L 6.5 -2.5 L 6.5 -5 L 10 -5 L 10 -1 L 10 8 Z"/>
+        <line x1="-10" y1="-1" x2="10" y2="-1"/>
+        <rect x="-2" y="1.5" width="4" height="6.5"/>
+        <line x1="0" y1="-9" x2="0" y2="-5"/>
+        <path d="M 0 -9 L 4.5 -7.3 L 0 -5.6 Z" fill="currentColor" stroke="none"/>
+      </g>`;
+    default:
+      return `<circle cx="${cx}" cy="${cy}" r="${5*s}" stroke="currentColor" stroke-width="1.3" fill="none"/>`;
+  }
+}
+
+function npcMarker(cx, cy, color){
+  return `<g transform="translate(${cx},${cy})">
+    <circle r="6" fill="${color}" opacity="0.18"/>
+    <circle r="3" fill="${color}"/>
+    <circle r="3" fill="none" stroke="${color}" stroke-width="1" opacity="0.6"/>
+  </g>`;
+}
+
+function mysteryMarker(cx, cy){
+  return `<g transform="translate(${cx},${cy})" class="mystery-marker">
+    <circle r="7" fill="none" stroke="var(--text-dim)" stroke-width="1" stroke-dasharray="2 2"/>
+    <text x="0" y="3.5" text-anchor="middle" font-family="Cinzel, serif" font-size="9" fill="var(--text-dim)">?</text>
+  </g>`;
+}
+
+function buildMapSVG(s){
+  // Virtual world space matches the new territory coordinate range (roughly -200..350 on x, -220..300 on y).
+  // The SVG itself is drawn at a fixed large size; panning/zooming is handled by the
+  // container's transform (see setupMapPanZoom in game_logic.js), not by changing the viewBox here.
+  const W=1100, H=1000;
+  const originX=260, originY=480; // where world (0,0) — Ashveil Hold — sits in SVG space
+  const scale=1.55;
+
+  const mx = x => originX + x*scale;
+  const my = y => originY - y*scale; // invert y so "north" (positive y) is up on screen
+
+  let paths='';
+  let nodes='';
+  let labels='';
+
+  function isLocked(t){ return !t.conquered && !isAttackable(s,t); }
+
+  // Route lines following actual adjacency (territory-to-territory and hold-to-territory)
+  const drawn=new Set();
+  s.territories.forEach(t=>{
+    t.adj.forEach(a=>{
+      const key=[t.id,a].sort().join('|');
+      if(drawn.has(key)) return;
+      drawn.add(key);
+      const x1=mx(t.x), y1=my(t.y);
+      let x2,y2,otherConquered;
+      if(a==='hold'){ x2=mx(ASHVEIL_HOLD.x); y2=my(ASHVEIL_HOLD.y); otherConquered=true; }
+      else {
+        const other=s.territories.find(x=>x.id===a);
+        if(!other) return;
+        x2=mx(other.x); y2=my(other.y); otherConquered=other.conquered;
+      }
+      const bothOpen = t.conquered && otherConquered;
+      const eitherLocked = isLocked(t) || (a!=='hold' && isLocked(s.territories.find(x=>x.id===a)));
+      const cls = bothOpen ? 'route-line conquered' : (eitherLocked ? 'route-line locked' : 'route-line');
+      paths += `<path d="M ${x1} ${y1} Q ${(x1+x2)/2 + (y1-y2)*0.06} ${(y1+y2)/2 + (x2-x1)*0.06} ${x2} ${y2}" class="${cls}" fill="none"/>`;
+    });
+  });
+
+  // Ashveil Hold itself
+  nodes += `<g class="map-node hold-node">
+    <circle cx="${mx(ASHVEIL_HOLD.x)}" cy="${my(ASHVEIL_HOLD.y)}" r="26" class="node-ring hold-ring"/>
+    ${terrainIcon('hold', mx(ASHVEIL_HOLD.x), my(ASHVEIL_HOLD.y), 1.5)}
+  </g>`;
+  labels += `<text x="${mx(ASHVEIL_HOLD.x)}" y="${my(ASHVEIL_HOLD.y)+36}" class="map-label hold-label" text-anchor="middle">Ashveil Hold</text>`;
+
+  // Region labels (faint, drawn once per region behind the nodes, positioned near the region's centroid)
+  const regionPoints={};
+  s.territories.forEach(t=>{ (regionPoints[t.region]=regionPoints[t.region]||[]).push(t); });
+  let regionLabels='';
+  Object.entries(regionPoints).forEach(([region,list])=>{
+    const avgX=list.reduce((a,t)=>a+t.x,0)/list.length;
+    const avgY=list.reduce((a,t)=>a+t.y,0)/list.length;
+    regionLabels += `<text x="${mx(avgX)}" y="${my(avgY)-46}" class="region-label" text-anchor="middle">${region}</text>`;
+  });
+
+  // Territories
+  s.territories.forEach(t=>{
+    const locked=isLocked(t);
+    const cx=mx(t.x), cy=my(t.y);
+    const cls = ['map-node','territory-node'];
+    if(t.conquered) cls.push('conquered');
+    if(locked) cls.push('locked');
+    if(t.final) cls.push('final');
+    const r = t.final ? 26 : (20 + t.tier*1.5);
+
+    nodes += `<g class="${cls.join(' ')}" data-tid="${t.id}" tabindex="0">
+      <circle cx="${cx}" cy="${cy}" r="${r+1.5}" class="node-ring-halo"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" class="node-ring"/>
+      ${terrainIcon(t.kind, cx, cy, locked?0.85:1.05)}
+      ${locked ? `<g transform="translate(${cx},${cy})" class="lock-overlay"><rect x="-5" y="-1" width="10" height="8" rx="1.5"/><path d="M -3 -1 L -3 -4 A 3 3 0 0 1 3 -4 L 3 -1" fill="none" stroke-width="1.6"/></g>` : ''}
+    </g>`;
+
+    const labelText = locked ? `${t.name} (sealed)` : t.name;
+    labels += `<text x="${cx}" y="${cy+r+13}" class="map-label ${t.conquered?'conquered-label':''}" text-anchor="middle">${labelText}</text>`;
+  });
+
+  // Mystery sites (fog of war)
+  s.mysterySites.forEach(site=>{
+    const cx=mx(site.x), cy=my(site.y);
+    if(site.discovered){
+      nodes += `<g class="map-node site-node" data-site="${site.id}" tabindex="0">
+        <circle cx="${cx}" cy="${cy}" r="15" class="node-ring site-ring"/>
+        <g transform="translate(${cx},${cy})" stroke="currentColor" stroke-width="1.2" fill="none">
+          <circle r="4"/><line x1="0" y1="-7" x2="0" y2="-4"/><line x1="0" y1="4" x2="0" y2="7"/>
+          <line x1="-7" y1="0" x2="-4" y2="0"/><line x1="4" y1="0" x2="7" y2="0"/>
+        </g>
+      </g>`;
+      labels += `<text x="${cx}" y="${cy+26}" class="map-label site-label" text-anchor="middle">${site.name}</text>`;
+    } else {
+      nodes += `<g class="map-node mystery-node">${mysteryMarker(cx,cy)}</g>`;
+    }
+  });
+
+  // Road NPCs
+  Object.values(s.roadNpcs).forEach(npc=>{
+    const cx=mx(npc.x), cy=my(npc.y);
+    if(npc.discovered){
+      nodes += `<g class="map-node npc-node" data-npc="${npc.id}" tabindex="0" transform="translate(${cx},${cy})">
+        ${npcMarker(0,0,npc.color)}
+      </g>`;
+      labels += `<text x="${cx}" y="${cy+18}" class="map-label npc-label" text-anchor="middle">${npc.name}</text>`;
+    } else {
+      nodes += `<g class="map-node mystery-node">${mysteryMarker(cx,cy)}</g>`;
+    }
+  });
+
+  // Decorative background terrain hints, spread across the much bigger canvas
+  const bgDecor = `
+    <g class="map-bg-decor" opacity="0.13" stroke="currentColor" fill="none" stroke-width="1.2">
+      <path d="M 100 120 Q 150 60 210 110 Q 260 65 320 115" />
+      <path d="M 780 160 L 830 90 L 865 140 L 905 80 L 945 150" stroke-linejoin="round"/>
+      <path d="M 120 760 Q 165 720 120 680" />
+      <path d="M 155 775 Q 200 735 155 695" />
+      <path d="M 190 785 Q 235 745 190 705" />
+      <path d="M 850 700 Q 900 660 870 610 Q 920 600 940 650" />
+      <path d="M 60 380 Q 110 340 60 300" />
+      <path d="M 950 450 L 990 400 L 1010 440 L 1040 390" stroke-linejoin="round"/>
+    </g>`;
+
+  // Compass rose, top-right corner of the fixed canvas
+  const compass = `
+    <g class="map-compass" transform="translate(${W-90},90)">
+      <circle r="34" class="compass-ring"/>
+      <line x1="0" y1="-29" x2="0" y2="29" class="compass-line"/>
+      <line x1="-29" y1="0" x2="29" y2="0" class="compass-line"/>
+      <path d="M 0 -29 L 7 -10 L 0 -16 L -7 -10 Z" class="compass-needle"/>
+      <text x="0" y="-40" text-anchor="middle" class="compass-label">N</text>
+    </g>`;
+
+  const corner = (x,y,rot) => `<g transform="translate(${x},${y}) rotate(${rot})" class="map-corner-flourish" stroke="currentColor" fill="none" stroke-width="1.4">
+      <path d="M 0 0 L 0 30 M 0 0 L 30 0 M 5 5 Q 14 5 14 14 Q 14 22 22 22"/>
+    </g>`;
+  const corners = corner(18,18,0) + corner(W-18,18,90) + corner(W-18,H-18,180) + corner(18,H-18,270);
+
+  return `<svg viewBox="0 0 ${W} ${H}" class="vaelmoor-map" xmlns="http://www.w3.org/2000/svg" id="vaelmoorMapSvg">
+    <defs>
+      <filter id="paperRough"><feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="2" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="4"/></filter>
+      <filter id="paperGrain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="grain"/><feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.07 0.07 0.07 0 0"/></filter>
+      <radialGradient id="mapVignette" cx="50%" cy="46%" r="75%">
+        <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+        <stop offset="80%" stop-color="#000000" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#000000" stop-opacity="0.5"/>
+      </radialGradient>
+    </defs>
+    <rect x="0" y="0" width="${W}" height="${H}" class="map-bg"/>
+    <rect x="0" y="0" width="${W}" height="${H}" filter="url(#paperGrain)" opacity="0.45" pointer-events="none"/>
+    ${bgDecor}
+    <rect x="8" y="8" width="${W-16}" height="${H-16}" class="map-border-outer" fill="none" pointer-events="none"/>
+    <rect x="15" y="15" width="${W-30}" height="${H-30}" class="map-border-inner" fill="none" pointer-events="none"/>
+    ${corners}
+    ${regionLabels}
+    <g filter="url(#paperRough)">
+      ${paths}
+    </g>
+    ${nodes}
+    ${labels}
+    ${compass}
+    <rect x="0" y="0" width="${W}" height="${H}" fill="url(#mapVignette)" pointer-events="none"/>
+  </svg>`;
+}
+/* =====================================================
+   ASHES OF VAELMOOR — Game Logic
+   ===================================================== */
+
+const CONQUER_TEXT = {
+  dunmar: "Dunmar Reach's thralls drop their tools as your banners crest the hill — the Hollow garrison's hold over them was thinner than steel.",
+  greywood: "The bandit-lords of the Greywood kneel in the leaf-litter, more pragmatic than proud. By dusk your colors hang from the old watchtowers.",
+  coldspire: "Coin or no coin, the Free Company knows when a contract has ended. Coldspire Pass opens its gates without a single arrow loosed in anger.",
+  saltmere: "The Drowned Fleet's black sails strike their colors one by one. Saltmere Harbor, and its deep-water docks, are yours.",
+  brackenfort: "Brackenfort's walls, the pride of Duke Mavros, fall in a single bloody afternoon. The Duke himself is nowhere to be found.",
+  marsh: "The Marsh-Mothers scatter into the reeds, and the Sunken Marsh falls silent — for the first time in a generation."
+};
+const DEFEAT_TEXT = {
+  dunmar: "The Hollow garrison at Dunmar Reach holds, its thrall-soldiers fighting with a hunger that has nothing to do with hunger.",
+  greywood: "The Greywood swallows your column whole — the bandit-lords know every root and hollow of these woods, and you do not.",
+  coldspire: "The Free Company earns their coin today. Coldspire Pass remains a wall of spears and frost.",
+  saltmere: "Saltmere's harbor cannons answer before your men reach the walls. The retreat is orderly, at least.",
+  brackenfort: "Brackenfort's walls do not so much as crack. Duke Mavros's banner still flies, mockingly, at dawn.",
+  marsh: "The Sunken Marsh drinks your soldiers down into the mud and gives nothing back. The Marsh-Mothers do not even bother to gloat.",
+  emberwastes: "The violet fire surges and your line breaks. The Ember Wastes are not yet ready to fall."
+};
+
+const ENDINGS = {
+  dawn:{ title:"Dawn Over Vaelmoor", eyebrow:"Victory",
+    text:"The Ember Throne shatters at your blow, and the violet fire that has burned in the capital's heart for ten years finally, truly dies. The husk wearing your father's face crumbles to ash and is carried off on the wind. Brother Ilun says the old wards are already knitting themselves back together — that the land remembers how to heal, when given the chance. Vaelmoor is yours, Kael Ashveil: scarred, hungry, but unburdened. The Ember Throne is cold for the first time in a decade, and for the first time in a decade, that feels like a mercy." },
+  ashking:{ title:"A King of Ash and Embers", eyebrow:"Victory",
+    text:"You bring the Hollow King down — but not before something of him passes into you. A coldness behind the eyes. A fire that flickers when you're not watching it. Vaelmoor is yours, and the people cheer, not knowing how close they came to cheering for someone else entirely. Brother Ilun watches you take the throne with an expression you can't quite read. 'The wards held,' he says quietly. 'Mostly.' You sit upon the Ember Throne, and for just a moment, it burns a little brighter than it should." },
+  hollowking:{ title:"The New Hollow King", eyebrow:"Victory — at a Price",
+    text:"The Hollow King falls — and rises again, wearing your face. You feel it happen, and by the time you understand what's happening, you no longer mind. The crowds outside Ashveil Hold cheer for their returned prince, and they are not wrong to. He has returned. He simply isn't entirely you anymore. Brother Ilun is the only one who sees it, and he says nothing, because there is nothing left to say. The Ember Throne burns violet once more, and the cycle that broke Vaelmoor a decade ago quietly, patiently, begins again." },
+  hollowcrown:{ title:"The Hollow Crown Claims Its Own", eyebrow:"Defeat — Corruption",
+    text:"You stop noticing the violet tint to your shadow sometime around the seventh bargain. By the time General Korrath notices it too, it is already too late to matter — to him, or to anyone else in Ashveil Hold. The kingdom you meant to save becomes, instead, the second thing the Unmaker ever wore. Somewhere, what's left of the real Kael Ashveil watches from very far away, and cannot quite remember why any of this had once seemed to matter." },
+  lastbanner:{ title:"The Last Banner Falls", eyebrow:"Defeat — No Army Remains",
+    text:"The last of your soldiers scatter in the night, and by morning Ashveil Hold's yard stands empty but for whoever still believes in you, alone, with nothing left to command. Whatever remains of your claim to Vaelmoor dissolves quietly into the long list of pretenders the kingdom has already forgotten." },
+  despair:{ title:"Despair at Ashveil Hold", eyebrow:"Defeat — Faith Lost",
+    text:"It isn't an army that ends your claim to Vaelmoor — it's silence. One by one, the people of Ashveil Hold stop meeting your eyes, stop answering when called, until even your closest companions no longer bring you news, because there's no one left who believes it matters. You sit the half-throne of a half-kingdom that has simply, quietly given up on you." },
+  abandoned:{ title:"Alone on the Ember Throne's Road", eyebrow:"Defeat — Abandoned",
+    text:"One by one, the people who might have stood beside you at the end have gone. There is no council left to awaken you each morning, no one left whose trust you spent carelessly enough to lose entirely. Whatever happens in the Ember Wastes now, you will face it without a single person who chose you. That, in the end, turns out to be its own kind of ending." },
+  longwinter:{ title:"The Long Winter", eyebrow:"Stalemate",
+    text:"Years pass. Vaelmoor settles into its six warring scraps and one forbidden ruin, and Ashveil Hold becomes simply one border fortress among many — its lord neither victor nor casualty, just another name on a map that stopped changing. Somewhere in the Ember Wastes, the violet fire burns on, patient as ever, and the kingdom slowly forgets it was ever any other way." }
+};
+
+const INTRO = {
+  title:"Ashes of Vaelmoor",
+  eyebrow:"Ten Years Since the Hollowing",
+  text:"King Aldous Vaelmoor — your father — opened a door that should have stayed shut, and something answered. The court calls it the Hollowing. The smallfolk call it the night the capital's fires turned violet, and never turned back.\n\nYou were smuggled out as a child, one more refugee among thousands. Now you return as Kael Ashveil, last of the bloodline, to a kingdom carved into six warring scraps and one forbidden ruin.\n\nAshveil Hold still stands — barely. General Korrath holds its walls, Lady Seris holds its secrets, and Brother Ilun holds what's left of its faith. Every one of them is watching to see who you really are.\n\nThe throne is still burning. The only question is what you'll do about it — and what it might do to you."
+};
+
+const GLOSSARY = [
+  {term:"Gold", def:"Your treasury. Spent on levying troops, fortifying Ashveil Hold, and parleying with rival territories."},
+  {term:"Grain", def:"Your food stores. Every turn your army eats some grain. If it runs out, soldiers desert and Faith drops."},
+  {term:"Soldiers", def:"The size of your army. Marching commits 60% of your soldiers to the attack."},
+  {term:"Faith", def:"How much your people and soldiers believe in you (0-100). If it reaches 0, they give up on you entirely."},
+  {term:"Corruption", def:"How much the Unmaker's influence has taken root in you (0-100). High corruption darkens your ending; 100 ends the game outright."},
+  {term:"Trust", def:"Each companion (Korrath, Seris, Ilun) has their own trust meter (0-100) that responds to specific choices you make involving them. Very low trust can cause them to leave permanently."},
+  {term:"Garrison", def:"The defensive strength of a territory — compared against your committed soldiers when you March."},
+  {term:"Territory / Province", def:"One of the seven regions of Vaelmoor. Six can be conquered; the seventh, the Ember Wastes, is the final target."},
+  {term:"March", def:"Attack a territory directly. Costs soldiers either way; wins if your attack power beats their garrison."},
+  {term:"Parley", def:"Attempt to negotiate a territory's surrender instead of fighting. Costs Gold and Faith."},
+  {term:"The Map", def:"Shows the realm, your companions' locations, discovered travelers, mystery sites, and the Butterfly Log of major consequences."},
+  {term:"Butterfly Log", def:"A record of major choices and their downstream consequences — view it from the Map to see how your decisions have rippled outward."},
+  {term:"Mystery Site", def:"A place on the map not yet discovered. Travel and events can reveal them."},
+  {term:"Road NPC", def:"A traveler you can meet during a march or parley journey. Once discovered, they remain on the map and can sometimes offer a favor."},
+  {term:"The Ember Wastes", def:"The ruined capital, seat of the Hollow King. Sealed until you've conquered 4 of the other 6 territories."},
+  {term:"The Hollow King", def:"What remains of your father after the Hollowing, bound to the Ember Throne."},
+  {term:"The Unmaker", def:"The entity that caused the Hollowing and tempts you through events and the Corruption stat."},
+  {term:"Turn", def:"One round: a story event, then one action (or a multi-day travel sequence), then upkeep."}
+];
+
+/* ---------- State ---------- */
+let state;
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr;
+}
+function genericEventIds(){ return EVENTS.filter(e=>e.category==='generic').map(e=>e.id); }
+
+function freshCompanions(){
+  const out={};
+  Object.values(CHARACTERS).forEach(c=>{ out[c.id]={trust:c.startTrust, departed:false}; });
+  return out;
+}
+function freshRoadNpcs(){
+  const out={};
+  Object.entries(ROAD_NPCS).forEach(([key,npc])=>{ out[key]={...npc, discovered:false}; });
+  return out;
+}
+function freshMysterySites(){
+  return MYSTERY_SITES.map(m=>({...m, discovered:false}));
+}
+
+function freshState(){
+  return {
+    turn:1, gold:40, grain:35, soldiers:25, faith:60, corruption:8,
+    territories:TERRITORY_DATA.map(t=>({...t, conquered:false})),
+    companions:freshCompanions(),
+    roadNpcs:freshRoadNpcs(),
+    mysterySites:freshMysterySites(),
+    log:[], butterflies:[], flags:{}, priorityQueue:[], seen:new Set(),
+    eventPool:shuffle(genericEventIds()),
+    currentEvent:null, phase:'event', ended:false, travel:null
+  };
+}
+
+function clampAll(){
+  state.gold=Math.max(0,Math.round(state.gold));
+  state.grain=Math.max(0,Math.round(state.grain));
+  state.soldiers=Math.max(0,Math.round(state.soldiers));
+  state.faith=Math.max(0,Math.min(100,Math.round(state.faith)));
+  state.corruption=Math.max(0,Math.min(100,Math.round(state.corruption)));
+}
+function addLog(s, text){ s.log.unshift({turn:s.turn, text}); }
+function conqueredCount(s){ return (s||state).territories.filter(t=>t.conquered && !t.final).length; }
+function isAttackable(s, t){
+  if(t.conquered) return false;
+  return t.adj.some(a=> a==='hold' || (s.territories.find(x=>x.id===a) && s.territories.find(x=>x.id===a).conquered));
+}
+function attackableTargets(s){ return s.territories.filter(t=>isAttackable(s,t)); }
+function frontierFor(s, t){
+  // Which conquered/held neighbors currently open this territory up
+  return t.adj.map(a=> a==='hold' ? 'Ashveil Hold' : (s.territories.find(x=>x.id===a)||{}).name)
+    .filter(Boolean);
+}
+
+/* ---------- Render: top-level ---------- */
+function render(){
+  document.getElementById('turnNum').textContent=state.turn;
+  document.getElementById('goldVal').textContent=state.gold;
+  document.getElementById('grainVal').textContent=state.grain;
+  document.getElementById('soldiersVal').textContent=state.soldiers;
+  document.getElementById('faithVal').textContent=state.faith;
+  document.getElementById('corruptionVal').textContent=state.corruption;
+  document.getElementById('faithBar').style.width=state.faith+'%';
+  document.getElementById('corruptionBar').style.width=state.corruption+'%';
+
+  renderTerritories();
+  renderCompanions();
+
+  const actionsPanel=document.getElementById('actionsPanel');
+  if(state.phase==='event'){
+    actionsPanel.style.display='none';
+    document.getElementById('activitiesPanel').style.display='none';
+    renderEvent();
+  } else {
+    renderResolvedEvent();
+    actionsPanel.style.display='block';
+    document.getElementById('activitiesPanel').style.display='block';
+    renderActions();
+    renderActivities();
+  }
+  renderChronicle();
+}
+
+function renderTerritories(){
+  const el=document.getElementById('territories');
+  const total=state.territories.filter(t=>!t.final).length;
+  const held=conqueredCount();
+  const frontier=attackableTargets(state).filter(t=>!t.final);
+  const finalT=state.territories.find(t=>t.final);
+  const finalReady=isAttackable(state, finalT);
+
+  let html=`<div class="campaign-progress">
+    <div class="campaign-progress-label"><span>Provinces Held</span><span class="mono">${held} / ${total}</span></div>
+    <div class="bar-track"><div class="bar-fill campaign" style="width:${Math.round(held/total*100)}%"></div></div>
+  </div>`;
+
+  html+=`<div class="frontier-label">Your Frontier — Open to Attack</div>`;
+  if(frontier.length===0 && !finalReady){
+    html+=`<div class="t-desc" style="padding:6px 0;">No provinces currently border your holdings. Something has gone wrong with the campaign — check the map.</div>`;
+  } else {
+    html+=frontier.slice(0,6).map(t=>`
+      <div class="territory-card">
+        <div class="t-name-row"><span class="t-icon">${terrainIconStandalone(t.kind)}</span><span class="t-name">${t.name}</span></div>
+        <div class="t-meta"><span>${t.owner}</span><span>Garrison ${t.garrison}</span></div>
+        <div class="t-desc">${t.desc}</div>
+      </div>`).join('');
+    if(frontier.length>6){
+      html+=`<div class="t-desc" style="padding:4px 0;">...and ${frontier.length-6} more open fronts. See the full map for everything.</div>`;
+    }
+    if(finalReady){
+      html+=`<div class="territory-card final-ready">
+        <div class="t-name-row"><span class="t-icon">${terrainIconStandalone(finalT.kind)}</span><span class="t-name">${finalT.name}</span></div>
+        <div class="t-meta"><span>${finalT.owner}</span><span>Garrison ${finalT.garrison}</span></div>
+        <div class="t-desc">The way to the Ember Wastes lies open at last.</div>
+      </div>`;
+    }
+  }
+  html+=`<div class="region-note">${total-held} provinces remain across six regions. Open the map to see the whole realm.</div>`;
+  el.innerHTML=html;
+}
+
+function terrainIconStandalone(kind){
+  return `<svg viewBox="-12 -12 24 24" width="18" height="18">${terrainIcon(kind,0,0,1)}</svg>`;
+}
+
+function renderCompanions(){
+  const el=document.getElementById('companionList');
+  el.innerHTML=Object.values(CHARACTERS).map(ch=>{
+    const comp=state.companions[ch.id];
+    const cls=['companion-card']; if(comp.departed) cls.push('departed');
+    const initial=ch.name.replace('General ','').replace('Lady ','').replace('Brother ','').trim()[0];
+    return `<div class="${cls.join(' ')}" style="--char-color:${ch.color}" data-char="${ch.id}">
+      <div class="char-badge">${initial}</div>
+      <div class="companion-meta">
+        <div class="companion-name">${ch.name}</div>
+        <div class="companion-trust-label">${comp.departed ? 'Departed' : trustLabel(comp.trust)}</div>
+        <div class="companion-trust-track"><div class="companion-trust-fill" style="width:${comp.departed?0:comp.trust}%"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.companion-card').forEach(card=>{
+    const charId=card.getAttribute('data-char');
+    if(state.companions[charId].departed) return;
+    card.onclick=()=>openTalk(charId);
+  });
+}
+
+function renderEvent(){
+  const ev=state.currentEvent;
+  const sp=speakerInfo(ev.speaker);
+  const el=document.getElementById('eventCard');
+  el.style.setProperty('--char-color', sp.color);
+  el.innerHTML=`
+    <div class="speaker-row">
+      <div class="speaker-badge">${sp.name[0]}</div>
+      <div class="speaker-meta"><span class="speaker-name">${sp.name}</span><span class="speaker-role">${sp.role||''}</span></div>
+    </div>
+    <h3>${ev.title}</h3>
+    <p class="event-text">${ev.text.replace(/\n/g,'<br><br>')}</p>
+    <div class="choice-list" id="choiceList"></div>
+  `;
+  const list=el.querySelector('#choiceList');
+  ev.choices.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.textContent=c.label;
+    btn.onclick=()=>{
+      const result=c.run(state);
+      clampAll();
+      addLog(state, `${ev.title}: ${result}`);
+      state.eventResult=result;
+      state.phase='resolved';
+      render();
+    };
+    list.appendChild(btn);
+  });
+}
+
+function renderResolvedEvent(){
+  const ev=state.currentEvent;
+  const sp=speakerInfo(ev.speaker);
+  const el=document.getElementById('eventCard');
+  el.style.setProperty('--char-color', sp.color);
+  el.innerHTML=`
+    <div class="speaker-row">
+      <div class="speaker-badge">${sp.name[0]}</div>
+      <div class="speaker-meta"><span class="speaker-name">${sp.name}</span><span class="speaker-role">${sp.role||''}</span></div>
+    </div>
+    <h3>${ev.title}</h3>
+    <p class="event-text">${ev.text.replace(/\n/g,'<br><br>')}</p>
+    <div class="result-text">${state.eventResult}</div>
+  `;
+}
+
+function renderActivities(){
+  const el=document.getElementById('activityGrid');
+  el.innerHTML=Object.entries(SIDE_ACTIVITIES).map(([key,a])=>`
+    <button class="activity-card" data-key="${key}">
+      <div class="activity-title"><svg class="activity-icon" viewBox="-12 -12 24 24">${activityIcon(key)}</svg>${a.label}</div>
+      <div class="activity-desc">${a.desc}</div>
+    </button>
+  `).join('');
+  el.querySelectorAll('.activity-card').forEach(btn=>{
+    btn.onclick=()=>{
+      const key=btn.getAttribute('data-key');
+      const activity=SIDE_ACTIVITIES[key];
+      const result=activity.run(state);
+      clampAll();
+      addLog(state, `${activity.label}: ${result}`);
+      render();
+    };
+  });
+}
+
+function activityIcon(key){
+  switch(key){
+    case 'training': return `<g stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"><line x1="-7" y1="7" x2="7" y2="-7"/><line x1="-7" y1="-7" x2="7" y2="7"/></g>`;
+    case 'hunting': return `<g stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"><path d="M -7 7 Q 0 -8 7 7"/><line x1="0" y1="-8" x2="0" y2="5"/></g>`;
+    case 'market': return `<g stroke="currentColor" stroke-width="1.3" fill="none"><path d="M -8 -2 L -6 -7 L 6 -7 L 8 -2 Z"/><line x1="-8" y1="-2" x2="-8" y2="7"/><line x1="8" y1="-2" x2="8" y2="7"/><line x1="-8" y1="7" x2="8" y2="7"/></g>`;
+    case 'study': return `<g stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"><path d="M -7 -6 L 0 -3 L 7 -6 L 7 6 L 0 3 L -7 6 Z"/><line x1="0" y1="-3" x2="0" y2="3"/></g>`;
+    default: return '';
+  }
+}
+
+function renderActions(){
+  const el=document.getElementById('actionsGrid');
+  const targets=attackableTargets(state);
+  const byRegion={};
+  targets.forEach(t=>{ (byRegion[t.region]=byRegion[t.region]||[]).push(t); });
+  const options=Object.entries(byRegion).map(([region,list])=>
+    `<optgroup label="${region}">${list.map(t=>`<option value="${t.id}">${t.name} (garrison ${t.garrison})</option>`).join('')}</optgroup>`
+  ).join('');
+  const gateNote = targets.length===0
+    ? `<div class="gate-note">No provinces currently border your holdings. Hold actions until your frontier opens.</div>`
+    : `<div class="gate-note">${conqueredCount()} of ${state.territories.filter(t=>!t.final).length} provinces held. The Ember Wastes open once all five of its bordering provinces fall.</div>`;
+
+  el.innerHTML=`
+    <button class="action-btn" id="btnLevy">Levy Troops<small>Cost: 25 gold → +5 soldiers, -2 faith</small></button>
+    <button class="action-btn" id="btnForage">Forage &amp; Trade<small>+10 grain, +4 gold</small></button>
+    <button class="action-btn" id="btnFortify">Fortify the Hold<small>Cost: 15 gold → +3 faith</small></button>
+    <button class="action-btn" id="btnRest">Hold Vigil &amp; Rest<small>+6 faith, +2 soldiers</small></button>
+    <div style="grid-column:1/-1;">
+      <div class="target-row">
+        <select id="targetSelect">${options}</select>
+        <button class="action-btn" id="btnMarch">March</button>
+        <button class="action-btn" id="btnParley">Parley</button>
+      </div>
+      ${gateNote}
+    </div>
+  `;
+  document.getElementById('btnLevy').disabled = state.gold<25;
+  document.getElementById('btnFortify').disabled = state.gold<15;
+  document.getElementById('btnLevy').onclick=()=>doAction(actionLevy);
+  document.getElementById('btnForage').onclick=()=>doAction(actionForage);
+  document.getElementById('btnFortify').onclick=()=>doAction(actionFortify);
+  document.getElementById('btnRest').onclick=()=>doAction(actionRest);
+  document.getElementById('btnMarch').onclick=()=>{ startTravelSequence(document.getElementById('targetSelect').value, 'march'); };
+  document.getElementById('btnParley').onclick=()=>{ startTravelSequence(document.getElementById('targetSelect').value, 'parley'); };
+  if(targets.length===0){
+    document.getElementById('btnMarch').disabled=true;
+    document.getElementById('btnParley').disabled=true;
+  }
+}
+
+function renderChronicle(){
+  const el=document.getElementById('chronicle');
+  if(state.log.length===0){ el.innerHTML=`<div class="entry">The chronicle is empty. History has not yet been written.</div>`; return; }
+  el.innerHTML=state.log.slice(0,40).map(e=>`<div class="entry"><span class="turn-mark">T${e.turn}</span>${e.text}</div>`).join('');
+}
+
+/* ---------- Actions ---------- */
+function actionLevy(s){
+  if(s.gold<30) return {text:"Korrath shakes her head. 'No coin, no swords, my lord. That's how it's always worked.'"};
+  const cap=soldierCap(s);
+  if(s.soldiers>=cap) return {text:`Korrath waves off the idea. 'We've no more billets, no more bread to feed them, and no more faith in the smallfolk to spare us their sons. ${s.soldiers} is all Ashveil Hold can field right now.'`};
+  s.gold-=30; s.soldiers+=Math.min(4, cap-s.soldiers); s.faith-=2; s.grain-=4;
+  return {text:"New levies march into Ashveil Hold's yard, frightened and unready — but they are soldiers now."};
+}
+function actionForage(s){ s.grain+=9; s.gold+=5; return {text:"Foraging parties and quiet trade with neighboring hamlets bring in supplies."}; }
+function actionFortify(s){
+  if(s.gold<15) return {text:"There's not enough coin in the treasury to so much as buy nails, let alone fortify the walls."};
+  s.gold-=15; s.faith+=3;
+  return {text:"Masons reinforce Ashveil Hold's old walls through the night. The garrison sleeps a little easier."};
+}
+function actionRest(s){ s.faith+=5; s.soldiers=Math.min(soldierCap(s), s.soldiers+1); return {text:"A day of rest. A few stragglers and deserters trickle back to the banner, and the camp's mood lightens."}; }
+
+// Faith and conquered provinces both expand how large an army Ashveil Hold can actually field —
+// this is the soft cap that keeps Levy from being an infinite-soldiers button.
+function soldierCap(s){
+  return 30 + Math.floor(s.faith*0.6) + conqueredCount(s)*6;
+}
+
+function queueAftermath(s, t){
+  if(EVENTS_BY_ID[t.id+'Aftermath']){ s.priorityQueue.unshift(t.id+'Aftermath'); return; }
+  // Region-secured: fires once, when the last non-final territory in a region falls.
+  const regionTerritories=s.territories.filter(x=>x.region===t.region && !x.final);
+  const allFallen=regionTerritories.every(x=>x.conquered);
+  const key='regionSecured_'+t.region;
+  if(allFallen && !s.flags[key]){
+    s.flags[key]=true;
+    s.priorityQueue.unshift('regionSecuredGeneric');
+    s.pendingRegionName=t.region;
+  } else if(!s.flags['foothold_'+t.id]){
+    s.flags['foothold_'+t.id]=true;
+    s.priorityQueue.unshift('footholdGeneric');
+  }
+}
+
+function march(s,tid){
+  const t=s.territories.find(x=>x.id===tid);
+  const committed=Math.floor(s.soldiers*0.55);
+  if(committed<6) return {text:"General Korrath refuses outright: 'We don't have enough men to march anywhere, my lord. Not yet — we'd be marching them to a grave, not a battle.'"};
+  let atk=committed*(0.85+Math.random()*0.3);
+  const def=t.garrison*(0.88+Math.random()*0.28);
+  let gateNote='';
+  if(tid==='brackenfort' && s.flags.brackenfortWeak){
+    atk*=1.25; delete s.flags.brackenfortWeak;
+    gateNote=" The bribed gate holds true — your attack strikes harder than the defenders expect.";
+  }
+  if(atk>def){
+    const losses=Math.round(committed*(def/atk)*0.55);
+    s.soldiers-=losses;
+    if(t.final){ s.victory=true; return {text:"The Hollow King's wards shatter like cheap glass. Your soldiers pour into the Ember Wastes as the violet fire ahead rears up to meet you."}; }
+    t.conquered=true; t.garrison=0; s.gold+=15+t.tier*5;
+    queueAftermath(s,t);
+    return {text:`${CONQUER_TEXT[tid]||defaultConquerText(t)}${gateNote} (-${losses} soldiers, +${15+t.tier*5} gold)`};
+  } else {
+    const losses=Math.round(committed*0.8);
+    s.soldiers-=losses; s.faith-=6;
+    const floor = t.final ? 20 : Math.max(4, Math.round(t.garrison*0.4));
+    t.garrison=Math.max(floor,Math.round(t.garrison-atk*0.25));
+    return {text:`${DEFEAT_TEXT[tid]||defaultDefeatText(t)}${gateNote} (-${losses} soldiers, -6 faith)`};
+  }
+}
+function defaultConquerText(t){ return `${t.name} falls after a hard-fought engagement — ${t.owner}'s banners are cut down and your own raised in their place.`; }
+function defaultDefeatText(t){ return `${t.name} holds. ${t.owner}'s defenders know this ground better than your soldiers do, and it costs you dearly.`; }
+
+function parley(s,tid){
+  const t=s.territories.find(x=>x.id===tid);
+  if(t.final) return {text:"Brother Ilun shakes his head slowly. 'There is no parley with what waits in the Ember Wastes. Only an ending.'"};
+  if(s.gold<18 || s.faith<5) return {text:"Seris spreads her hands. 'We've neither the coin nor the standing to even open talks, my lord.'"};
+  s.gold-=18; s.faith-=5;
+  const friendly=['Bandit Lords','The Free Company','The Drowned Fleet'];
+  let chance=(friendly.includes(t.owner)?0.42:0.18) - (t.tier-1)*0.05;
+  if(s.flags.serisTrustNetwork) chance+=0.08;
+  chance=Math.max(0.05, chance);
+  if(Math.random()<chance){
+    t.conquered=true; t.garrison=0;
+    queueAftermath(s,t);
+    return {text:`Envoys return with banners lowered: ${t.name} bends the knee without a drop of blood spilled.`};
+  } else {
+    t.garrison+=2;
+    return {text:`The talks collapse before they truly begin. ${t.owner} doubles its watch along the border. (-18 gold, -5 faith, garrison reinforced)`};
+  }
+}
+
+/* ===================== TRAVEL SEQUENCE ===================== */
+function startTravelSequence(tid, mode){
+  const t=state.territories.find(x=>x.id===tid);
+  const totalDays=t.travelDays||2;
+  // Decide if a road NPC encounter or generic encounter happens, weighted toward undiscovered NPCs.
+  const undiscoveredNpcs=Object.values(state.roadNpcs).filter(n=>!n.discovered);
+  const useNpc = undiscoveredNpcs.length>0 && Math.random()<0.55;
+  const npcKey = useNpc ? undiscoveredNpcs[Math.floor(Math.random()*undiscoveredNpcs.length)].id : null;
+
+  state.travel={
+    tid, mode, totalDays, day:0,
+    encounterDay: 1+Math.floor(Math.random()*Math.max(1,totalDays-1)),
+    encounterShown:false,
+    encounterIndex: Math.floor(Math.random()*TRAVEL_ENCOUNTERS.length),
+    npcKey
+  };
+  renderTravelStep();
+  document.getElementById('travelOverlay').classList.remove('hidden');
+}
+
+function renderTravelStep(){
+  const travel=state.travel;
+  const t=state.territories.find(x=>x.id===travel.tid);
+  const box=document.getElementById('travelBox');
+  const pct=Math.round((travel.day/travel.totalDays)*100);
+  const modeLabel = travel.mode==='march' ? 'Marching toward' : 'Riding toward';
+
+  box.innerHTML=`
+    <div class="travel-meta"><svg class="t-icon" viewBox="-12 -12 24 24">${terrainIcon(t.kind,0,0,1)}</svg>${modeLabel} ${t.name}</div>
+    <h2>The Road to ${t.name}</h2>
+    <div class="travel-progress-track"><div class="travel-progress-fill" style="width:${pct}%"></div></div>
+    <div class="travel-days-label"><span>Ashveil Hold</span><span>Day ${travel.day} of ${travel.totalDays}</span><span>${t.name}</span></div>
+    <div id="travelStepBody"></div>
+  `;
+  const body=document.getElementById('travelStepBody');
+
+  if(travel.day===0){
+    body.innerHTML=`<p class="travel-text">The column forms up at first light — banners, supply carts, and the particular quiet of soldiers who don't yet know what's waiting for them.</p>
+      <div class="glossary-close-row"><button class="big-btn" id="travelNextBtn">Set Out</button></div>`;
+    document.getElementById('travelNextBtn').onclick=advanceTravel;
+    return;
+  }
+
+  if(travel.day===travel.encounterDay && !travel.encounterShown){
+    if(travel.npcKey){ renderNpcTravelEncounter(); return; }
+    const enc=TRAVEL_ENCOUNTERS[travel.encounterIndex];
+    body.innerHTML=`<p class="travel-text">${enc.text}</p><div class="choice-list" id="travelChoices"></div>`;
+    const list=document.getElementById('travelChoices');
+    enc.choices.forEach(c=>{
+      const btn=document.createElement('button');
+      btn.className='choice-btn'; btn.textContent=c.label;
+      btn.onclick=()=>{
+        const result=c.run(state); clampAll();
+        travel.encounterShown=true;
+        body.innerHTML=`<p class="travel-text">${enc.text}</p><div class="travel-result">${result}</div><div class="glossary-close-row"><button class="big-btn" id="travelNextBtn">Continue</button></div>`;
+        document.getElementById('travelNextBtn').onclick=advanceTravel;
+      };
+      list.appendChild(btn);
+    });
+    return;
+  }
+
+  if(travel.day>=travel.totalDays){
+    const arrivalLine = travel.mode==='march'
+      ? "time to see whose banners are still standing by nightfall."
+      : "time to see if words will do what swords don't have to.";
+    body.innerHTML=`<p class="travel-text">${t.name} rises into view on the horizon at last — ${arrivalLine}</p>
+      <div class="glossary-close-row"><button class="big-btn" id="travelArriveBtn">Arrive</button></div>`;
+    document.getElementById('travelArriveBtn').onclick=resolveTravelArrival;
+    return;
+  }
+
+  body.innerHTML=`<p class="travel-text">The column presses on. Another day's march behind you, the road ahead still long.</p>
+    <div class="glossary-close-row"><button class="big-btn" id="travelNextBtn">Continue</button></div>`;
+  document.getElementById('travelNextBtn').onclick=advanceTravel;
+}
+
+function renderNpcTravelEncounter(){
+  const travel=state.travel;
+  const npc=state.roadNpcs[travel.npcKey];
+  const content=ROAD_NPC_CONTENT[travel.npcKey];
+  const body=document.getElementById('travelStepBody');
+
+  npc.discovered=true;
+  logButterfly(state, 'npc-met', `You met ${npc.name} on the road.`, content.introText.replace(/<[^>]+>/g,'').slice(0,140)+'...');
+
+  body.innerHTML=`
+    <div class="travel-npc-banner">
+      <div class="char-badge" style="--char-color:${npc.color}; background:${npc.color};">${npc.name[0]}</div>
+      <div><strong>${content.introTitle}</strong></div>
+    </div>
+    <p class="travel-text">${content.introText}</p>
+    <div class="choice-list" id="travelChoices"></div>
+  `;
+  const list=document.getElementById('travelChoices');
+  content.talks.forEach(t=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn'; btn.textContent=t.label;
+    btn.onclick=()=>{
+      const result = t.run ? t.run(state) : t.text;
+      clampAll();
+      travel.encounterShown=true;
+      body.innerHTML=`<p class="travel-text">${content.introText}</p><div class="travel-result">${result}</div><div class="glossary-close-row"><button class="big-btn" id="travelNextBtn">Continue</button></div>`;
+      document.getElementById('travelNextBtn').onclick=advanceTravel;
+    };
+    list.appendChild(btn);
+  });
+}
+
+function advanceTravel(){ state.travel.day+=1; renderTravelStep(); }
+
+function resolveTravelArrival(){
+  const travel=state.travel;
+  document.getElementById('travelOverlay').classList.add('hidden');
+  state.travel=null;
+  if(travel.mode==='march') doAction(s=>march(s, travel.tid));
+  else doAction(s=>parley(s, travel.tid));
+}
+
+/* ---------- Turn resolution ---------- */
+function doAction(fn){
+  const result=fn(state);
+  clampAll();
+  addLog(state, result.text);
+
+  if(state.victory){ showEnding(victoryEnding()); return; }
+  upkeep();
+  const endKey=checkEndings();
+  if(endKey){ showEnding(endKey); return; }
+
+  state.turn+=1;
+  if(state.turn>30){ showEnding('longwinter'); return; }
+
+  drawEvent();
+  state.phase='event';
+  render();
+}
+
+function upkeep(){
+  const consumption=Math.ceil(state.soldiers/6);
+  state.grain-=consumption;
+  if(state.grain<0){
+    const deserters=Math.min(state.soldiers, Math.abs(state.grain)*2);
+    state.soldiers-=deserters; state.faith-=8; state.grain=0;
+    addLog(state, `Starvation stalks the camp. ${deserters} soldiers slip away into the night.`);
+  }
+  state.territories.forEach(t=>{ if(t.conquered){ state.gold+=t.goldInc; state.grain+=t.grainInc; } });
+
+  // Corruption recedes slowly on its own, faster if the Hold is warded — without this,
+  // a long campaign's accumulated minor temptations compound into an unwinnable spiral
+  // regardless of how the player is actually playing.
+  if(state.corruption>0){
+    let decay=0.6 + (state.flags.wardProtected?0.5:0);
+    state.corruption=Math.max(0, state.corruption-decay);
+  }
+
+  if(state.corruption>50){
+    let chance=(state.corruption-50)/100;
+    if(state.flags.wardProtected) chance*=0.5;
+    if(Math.random()<chance){
+      const dmg=3+Math.floor(Math.random()*4);
+      state.soldiers=Math.max(0,state.soldiers-dmg);
+      state.gold=Math.max(0,state.gold-5);
+      state.faith-=4;
+      addLog(state, `Hollow-touched raiders strike at Ashveil's outer walls in the night. (-${dmg} soldiers, -5 gold, -4 faith)`);
+    }
+  }
+  clampAll();
+}
+
+function victoryEnding(){
+  if(state.corruption<35) return 'dawn';
+  if(state.corruption<=65) return 'ashking';
+  return 'hollowking';
+}
+function allCompanionsDeparted(){ return Object.values(state.companions).every(c=>c.departed); }
+function checkEndings(){
+  if(state.corruption>=100) return 'hollowcrown';
+  if(state.soldiers<=0) return 'lastbanner';
+  if(state.faith<=0) return 'despair';
+  if(allCompanionsDeparted()) return 'abandoned';
+  return null;
+}
+
+/* ===================== EVENT FLOW ===================== */
+function resolveEventText(ev){
+  // Some events use a function for `text` so they can reference live state (e.g. region names).
+  // We resolve it into a plain string on a shallow copy so renderEvent/renderResolvedEvent never
+  // have to know the difference, and repeated draws of the same event object don't get mutated permanently.
+  if(typeof ev.text==='function'){
+    return Object.assign({}, ev, {text: ev.text(state)});
+  }
+  return ev;
+}
+
+function drawEvent(){
+  while(state.priorityQueue.length>0){
+    const id=state.priorityQueue.shift();
+    if(!state.seen.has(id) && EVENTS_BY_ID[id]){ state.currentEvent=resolveEventText(EVENTS_BY_ID[id]); state.seen.add(id); return; }
+  }
+  let guard=0;
+  while(guard<50){
+    guard++;
+    if(state.eventPool.length===0) state.eventPool=shuffle(genericEventIds());
+    const id=state.eventPool.pop();
+    const ev=EVENTS_BY_ID[id];
+    if(ev.condition && !ev.condition(state)) continue;
+    state.currentEvent=resolveEventText(ev); state.seen.add(id);
+    return;
+  }
+  state.currentEvent=resolveEventText(EVENTS_BY_ID['merchantCaravan']);
+}
+
+/* ===================== COMPANION TALK ===================== */
+function openTalk(charId){
+  const ch=CHARACTERS[charId];
+  const comp=state.companions[charId];
+  const band=trustBand(comp.trust);
+  const box=document.getElementById('talkBox');
+  const initial=ch.name.replace('General ','').replace('Lady ','').replace('Brother ','').trim()[0];
+
+  const favorAvailable = band==='trusted' || band==='devoted';
+
+  box.innerHTML=`
+    <div class="talk-header">
+      <div class="talk-badge" style="--char-color:${ch.color}">${initial}</div>
+      <div><div class="talk-name" style="color:${ch.color}">${ch.name}</div><div class="talk-role">${ch.role}</div></div>
+    </div>
+    <div class="talk-trust-row"><span>Trust</span><div class="talk-trust-track"><div class="talk-trust-fill" style="width:${comp.trust}%; background:${ch.color}"></div></div><span>${trustLabel(comp.trust)}</span></div>
+    <p class="talk-band-text">${ch.bands[band]}</p>
+    <p class="travel-text">${ch.bio}</p>
+    <div class="choice-list" id="talkChoices"></div>
+    <div class="glossary-close-row"><button class="big-btn" id="talkCloseBtn">Leave</button></div>
+  `;
+
+  const list=document.getElementById('talkChoices');
+  const askBtn=document.createElement('button');
+  askBtn.className='choice-btn';
+  askBtn.textContent="Ask how things truly stand";
+  askBtn.onclick=()=>{
+    const lines={
+      korrath:"'Walls hold. Men train. Whatever you're planning, lord, say the word and we move.'",
+      seris:"'The realm has more eyes on it than you'd think, my lord — most of them mine, the rest I'm working on.'",
+      ilun:"'The wards hold, for now. The dreams have not gotten quieter. I would tell you if they had.'"
+    };
+    document.getElementById('talkChoices').innerHTML=`<p class="travel-result">${lines[charId]}</p>`;
+  };
+  list.appendChild(askBtn);
+
+  if(favorAvailable){
+    const favorBtn=document.createElement('button');
+    favorBtn.className='choice-btn';
+    favorBtn.textContent=companionFavorLabel(charId);
+    favorBtn.onclick=()=>{
+      const result=companionFavor(charId, state);
+      clampAll();
+      addLog(state, result);
+      document.getElementById('talkChoices').innerHTML=`<p class="travel-result">${result}</p>`;
+      renderCompanions();
+    };
+    list.appendChild(favorBtn);
+  }
+
+  document.getElementById('talkCloseBtn').onclick=()=>{ document.getElementById('talkOverlay').classList.add('hidden'); render(); };
+  document.getElementById('talkOverlay').classList.remove('hidden');
+}
+
+function companionFavorLabel(charId){
+  return {
+    korrath:"Ask Korrath to personally train the garrison (+ Soldiers, + Faith)",
+    seris:"Ask Seris to scout a rival territory (weakens a random garrison)",
+    ilun:"Ask Ilun for a blessing before your next march (− Corruption, + Faith)"
+  }[charId];
+}
+function companionFavor(charId, s){
+  if(charId==='korrath'){ s.soldiers+=3; s.faith+=2; return "Korrath takes the garrison through drills personally for a day. The men fight harder for a general who still bothers to show up. (+3 soldiers, +2 faith)"; }
+  if(charId==='seris'){
+    const targets=s.territories.filter(t=>!t.conquered && !t.final);
+    if(targets.length===0) return "Seris spreads her hands. 'Nothing left to scout, my lord. You've taken it all.'";
+    const t=targets[Math.floor(Math.random()*targets.length)];
+    t.garrison=Math.max(2,t.garrison-2);
+    return `Seris returns three days later with a hand-drawn map of ${t.name}'s weak points. (${t.name}'s garrison weakened)`;
+  }
+  if(charId==='ilun'){ s.corruption=Math.max(0,s.corruption-5); s.faith+=3; return "Ilun's blessing is quiet, old, and oddly heavy — like something settling back into place. (-5 corruption, +3 faith)"; }
+  return "";
+}
+
+/* ===================== MAP ===================== */
+let mapActiveTab='realm';
+let mapView={ x:0, y:0, zoom:1 }; // pan offset (px) and zoom level, applied to the .vaelmoor-map element
+function openMap(){
+  mapActiveTab='realm';
+  renderMapOverlay();
+  document.getElementById('mapOverlay').classList.remove('hidden');
+  // center the viewport on Ashveil Hold the first time the map is opened in a session
+  requestAnimationFrame(centerMapOnHold);
+}
+function centerMapOnHold(){
+  const viewport=document.getElementById('mapViewport');
+  if(!viewport) return;
+  const vw=viewport.clientWidth, vh=viewport.clientHeight;
+  // Ashveil Hold sits at SVG-space (260,480) per buildMapSVG's origin — center the viewport there.
+  mapView.zoom = mapView.zoom || 0.62;
+  mapView.x = vw/2 - 260*mapView.zoom;
+  mapView.y = vh/2 - 480*mapView.zoom;
+  applyMapTransform();
+}
+function applyMapTransform(){
+  const svg=document.getElementById('vaelmoorMapSvg');
+  if(!svg) return;
+  svg.style.transform=`translate(${mapView.x}px, ${mapView.y}px) scale(${mapView.zoom})`;
+}
+function renderMapOverlay(){
+  const box=document.getElementById('mapBox');
+  box.innerHTML=`
+    <h2>The Map of Vaelmoor</h2>
+    <div class="map-tabs">
+      <div class="map-tabs-left">
+        <button class="map-tab" data-tab="realm">The Realm</button>
+        <button class="map-tab" data-tab="butterflies">Butterfly Log</button>
+      </div>
+      <div class="map-zoom-controls" id="mapZoomControls">
+        <button class="map-zoom-btn" id="mapZoomOut">\u2212</button>
+        <button class="map-zoom-btn" id="mapZoomReset">\u2022</button>
+        <button class="map-zoom-btn" id="mapZoomIn">+</button>
+      </div>
+    </div>
+    <div id="mapTabContent"></div>
+    <div class="glossary-close-row"><button class="big-btn" id="mapCloseBtn">Close</button></div>
+  `;
+  box.querySelectorAll('.map-tab').forEach(tab=>{
+    tab.classList.toggle('active', tab.getAttribute('data-tab')===mapActiveTab);
+    tab.onclick=()=>{ mapActiveTab=tab.getAttribute('data-tab'); renderMapOverlay(); };
+  });
+  document.getElementById('mapCloseBtn').onclick=()=>{ document.getElementById('mapOverlay').classList.add('hidden'); };
+
+  const content=document.getElementById('mapTabContent');
+  if(mapActiveTab==='realm'){
+    content.innerHTML=`
+      <div class="map-viewport" id="mapViewport">${buildMapSVG(state)}</div>
+      <div class="map-pan-hint">Drag to pan &middot; scroll or use the buttons above to zoom</div>
+      <div class="map-legend">
+        <span class="map-legend-item"><span class="map-legend-swatch" style="background:var(--gold)"></span>Conquered</span>
+        <span class="map-legend-item"><span class="map-legend-swatch" style="background:var(--text-dim)"></span>Unconquered</span>
+        <span class="map-legend-item"><span class="map-legend-swatch" style="background:var(--corrupt)"></span>The Ember Wastes</span>
+        <span class="map-legend-item"><span class="map-legend-swatch" style="background:var(--text)"></span>Discovered traveler</span>
+      </div>`;
+    content.querySelectorAll('.territory-node').forEach(node=>{
+      const tid=node.getAttribute('data-tid');
+      const t=state.territories.find(x=>x.id===tid);
+      const locked = !t.conquered && !isAttackable(state,t);
+      node.onclick=()=>{
+        let extra;
+        if(t.conquered) extra=' — Held by you.';
+        else if(locked) extra=` — Garrison ${t.garrison}. Not yet on your frontier; you must first hold: ${frontierFor(state,t).join(' or ')}.`;
+        else extra=` — Garrison ${t.garrison}. This province borders your holdings and can be attacked now.`;
+        showMapDetail(t.name, t.desc + extra);
+      };
+    });
+    content.querySelectorAll('.site-node').forEach(node=>{
+      const id=node.getAttribute('data-site');
+      const site=state.mysterySites.find(x=>x.id===id);
+      node.onclick=()=>showMapDetail(site.name, site.desc);
+    });
+    content.querySelectorAll('.npc-node').forEach(node=>{
+      const id=node.getAttribute('data-npc');
+      const npc=state.roadNpcs[id];
+      const c=ROAD_NPC_CONTENT[id];
+      node.onclick=()=>showMapDetail(npc.name, npc.bio + (c.favor ? ` ${c.favor.label}` : ''));
+    });
+    setupMapPanZoom();
+    applyMapTransform();
+  } else {
+    if(state.butterflies.length===0){
+      content.innerHTML=`<div class="butterfly-empty">No great consequences have unfolded yet. Every choice you make will be remembered here.</div>`;
+    } else {
+      content.innerHTML=`<div class="butterfly-list">${state.butterflies.slice().reverse().map(b=>`
+        <div class="butterfly-item">
+          <span class="butterfly-turn">Turn ${b.turn}</span>
+          <div class="butterfly-headline">${b.headline}</div>
+          <div class="butterfly-detail">${b.detail}</div>
+        </div>
+      `).join('')}</div>`;
+    }
+  }
+}
+function showMapDetail(title, desc){
+  const content=document.getElementById('mapTabContent');
+  const existing=content.querySelector('.map-detail-popup');
+  if(existing) existing.remove();
+  const detail=document.createElement('div');
+  detail.className='butterfly-item map-detail-popup';
+  detail.style.marginTop='14px';
+  detail.innerHTML=`<div class="butterfly-headline">${title}</div><div class="butterfly-detail">${desc}</div>`;
+  content.appendChild(detail);
+}
+
+function setupMapPanZoom(){
+  const viewport=document.getElementById('mapViewport');
+  if(!viewport) return;
+  let dragging=false, lastX=0, lastY=0, moved=false;
+
+  function clampZoom(z){ return Math.max(0.32, Math.min(1.6, z)); }
+
+  viewport.addEventListener('mousedown', e=>{
+    dragging=true; moved=false; lastX=e.clientX; lastY=e.clientY;
+    viewport.classList.add('dragging');
+  });
+  window.addEventListener('mousemove', e=>{
+    if(!dragging) return;
+    const dx=e.clientX-lastX, dy=e.clientY-lastY;
+    if(Math.abs(dx)>2 || Math.abs(dy)>2) moved=true;
+    mapView.x+=dx; mapView.y+=dy;
+    lastX=e.clientX; lastY=e.clientY;
+    applyMapTransform();
+  });
+  window.addEventListener('mouseup', ()=>{ dragging=false; viewport.classList.remove('dragging'); });
+
+  // prevent click-through to node handlers when the drag was an actual pan, not a tap
+  viewport.addEventListener('click', e=>{ if(moved){ e.stopPropagation(); moved=false; } }, true);
+
+  viewport.addEventListener('wheel', e=>{
+    e.preventDefault();
+    const rect=viewport.getBoundingClientRect();
+    const px=e.clientX-rect.left, py=e.clientY-rect.top;
+    const oldZoom=mapView.zoom;
+    const newZoom=clampZoom(oldZoom * (e.deltaY<0 ? 1.12 : 0.89));
+    // zoom toward cursor position
+    mapView.x = px - ((px-mapView.x)/oldZoom)*newZoom;
+    mapView.y = py - ((py-mapView.y)/oldZoom)*newZoom;
+    mapView.zoom=newZoom;
+    applyMapTransform();
+  }, {passive:false});
+
+  // touch support (single-finger pan)
+  viewport.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1) return;
+    dragging=true; lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+  }, {passive:true});
+  viewport.addEventListener('touchmove', e=>{
+    if(!dragging || e.touches.length!==1) return;
+    const dx=e.touches[0].clientX-lastX, dy=e.touches[0].clientY-lastY;
+    mapView.x+=dx; mapView.y+=dy;
+    lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+    applyMapTransform();
+  }, {passive:true});
+  viewport.addEventListener('touchend', ()=>{ dragging=false; });
+
+  document.getElementById('mapZoomIn').onclick=()=>{ mapView.zoom=clampZoom(mapView.zoom*1.25); applyMapTransform(); };
+  document.getElementById('mapZoomOut').onclick=()=>{ mapView.zoom=clampZoom(mapView.zoom*0.8); applyMapTransform(); };
+  document.getElementById('mapZoomReset').onclick=()=>{ centerMapOnHold(); };
+}
+
+/* ===================== GLOSSARY ===================== */
+function renderGlossaryList(filter){
+  const el=document.getElementById('glossaryList');
+  const q=filter.trim().toLowerCase();
+  const items=GLOSSARY.filter(g=>!q || g.term.toLowerCase().includes(q) || g.def.toLowerCase().includes(q));
+  if(items.length===0){ el.innerHTML=`<div class="glossary-empty">No words found matching "${filter}".</div>`; return; }
+  el.innerHTML=items.map(g=>`<div class="glossary-item"><div class="glossary-term">${g.term}</div><div class="glossary-def">${g.def}</div></div>`).join('');
+}
+function setupGlossary(){
+  const btn=document.getElementById('glossaryBtn');
+  const overlay=document.getElementById('glossaryOverlay');
+  const closeBtn=document.getElementById('glossaryCloseBtn');
+  const search=document.getElementById('glossarySearch');
+  btn.onclick=()=>{ renderGlossaryList(''); search.value=''; overlay.classList.remove('hidden'); search.focus(); };
+  closeBtn.onclick=()=>{ overlay.classList.add('hidden'); };
+  overlay.onclick=(e)=>{ if(e.target===overlay) overlay.classList.add('hidden'); };
+  search.oninput=()=>{ renderGlossaryList(search.value); };
+}
+function setupMapButton(){
+  document.getElementById('mapBtn').onclick=openMap;
+  document.getElementById('mapOverlay').onclick=(e)=>{ if(e.target.id==='mapOverlay') document.getElementById('mapOverlay').classList.add('hidden'); };
+  document.getElementById('talkOverlay').onclick=(e)=>{ if(e.target.id==='talkOverlay'){ document.getElementById('talkOverlay').classList.add('hidden'); render(); } };
+}
+
+/* ===================== INTRO / ENDINGS ===================== */
+function showEnding(key){
+  const ending=ENDINGS[key];
+  const box=document.getElementById('overlayBox');
+  box.innerHTML=`
+    <div class="eyebrow">${ending.eyebrow}</div>
+    <h2>${ending.title}</h2>
+    <p>${ending.text.replace(/\n\n/g,'</p><p>')}</p>
+    <p style="color:var(--text-dim); font-size:14px;">Reached on turn ${state.turn}, with ${state.corruption} corruption and ${conqueredCount()} provinces broken.</p>
+    <button class="big-btn" id="restartBtn">Begin Anew</button>
+  `;
+  document.getElementById('overlay').classList.remove('hidden');
+  document.getElementById('restartBtn').onclick=startGame;
+}
+function showIntro(){
+  const box=document.getElementById('overlayBox');
+  box.innerHTML=`
+    <div class="eyebrow">${INTRO.eyebrow}</div>
+    <h2>${INTRO.title}</h2>
+    <p>${INTRO.text.replace(/\n\n/g,'</p><p>')}</p>
+    <button class="big-btn" id="beginBtn">Take Up the Ember Crown</button>
+  `;
+  document.getElementById('overlay').classList.remove('hidden');
+  document.getElementById('beginBtn').onclick=()=>{
+    document.getElementById('overlay').classList.add('hidden');
+    state=freshState();
+    drawEvent();
+    render();
+  };
+}
+function startGame(){
+  document.getElementById('overlay').classList.add('hidden');
+  state=freshState();
+  drawEvent();
+  render();
+}
+
+setupGlossary();
+setupMapButton();
+showIntro();
+</script>
+</body>
+</html>

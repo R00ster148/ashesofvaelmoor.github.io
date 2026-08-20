@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ashes of Vaelmoor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root{
+  --bg:#15110f;
+  --bg-deep:#0f0c0a;
+  --panel:#221c18;
+  --panel-light:#2b231e;
+  --border:#473a30;
+  --text:#ddd0bc;
+  --text-dim:#9a8a76;
+  --ember:#cf5b2e;
+  --ember-glow:rgba(207,91,46,0.35);
+  --gold:#c79a47;
+  --blood:#8a3232;
+  --corrupt:#7a4ea3;
+  --corrupt-deep:#3a2150;
+}
+
+*{box-sizing:border-box;}
+
+html,body{margin:0;padding:0;}
+
+body{
+  background:
+    radial-gradient(ellipse at top, rgba(207,91,46,0.06), transparent 60%),
+    var(--bg-deep);
+  color:var(--text);
+  font-family:'EB Garamond', serif;
+  font-size:17px;
+  line-height:1.5;
+  min-height:100vh;
+}
+
+h1,h2,h3,.label,.btn,.title{
+  font-family:'Cinzel', serif;
+}
+
+.mono{font-family:'JetBrains Mono', monospace;}
+
+.app{
+  max-width:1180px;
+  margin:0 auto;
+  padding:18px 18px 60px;
+}
+
+/* ---------- Banner ---------- */
+.banner{
+  text-align:center;
+  padding:22px 10px 16px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:22px;
+  position:relative;
+}
+.banner h1{
+  margin:0;
+  font-size:clamp(28px,5vw,46px);
+  letter-spacing:0.12em;
+  color:var(--text);
+  text-shadow:0 0 18px var(--ember-glow);
+}
+.banner .sub{
+  margin-top:8px;
+  color:var(--text-dim);
+  font-size:14px;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+}
+.banner .sub .turn{color:var(--gold);}
+
+/* ---------- Layout ---------- */
+.layout{
+  display:grid;
+  grid-template-columns:260px 1fr 300px;
+  gap:18px;
+  align-items:stretch;
+  grid-template-areas:
+    "ledger  event  realm"
+    "quests  event  realm"
+    "quests  actions realm"
+    "chronicle chronicle chronicle";
+}
+@media (max-width:980px){
+  .layout{
+    grid-template-columns:1fr 1fr;
+    grid-template-areas:
+      "ledger  realm"
+      "quests  realm"
+      "event   event"
+      "actions actions"
+      "chronicle chronicle";
+  }
+}
+@media (max-width:640px){
+  .layout{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "ledger"
+      "realm"
+      "quests"
+      "event"
+      "actions"
+      "chronicle";
+  }
+}
+
+.area-ledger{grid-area:ledger;}
+.area-quests{grid-area:quests;}
+.area-realm{grid-area:realm;}
+.area-event{grid-area:event;}
+.area-actions{grid-area:actions;}
+.area-chronicle{grid-area:chronicle;}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  clip-path:polygon(0 10px,10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px));
+  padding:16px 18px;
+}
+
+.panel h2{
+  margin:0 0 12px;
+  font-size:14px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--gold);
+  border-bottom:1px solid var(--border);
+  padding-bottom:8px;
+}
+
+/* ---------- Ledger ---------- */
+.stat-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  margin-bottom:6px;
+  font-size:14px;
+}
+.stat-row .stat-name{color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase; font-size:12px;}
+.stat-row .stat-val{font-size:16px;}
+
+.bar-track{
+  height:7px;
+  background:var(--bg-deep);
+  border:1px solid var(--border);
+  margin:4px 0 12px;
+  overflow:hidden;
+  position:relative;
+}
+.bar-fill{
+  height:100%;
+  transition:width .4s ease;
+}
+.bar-fill.faith{background:linear-gradient(90deg,#7a6a3a,var(--gold));}
+.bar-fill.corruption{
+  background:linear-gradient(90deg,var(--corrupt-deep),var(--corrupt),var(--blood));
+  background-size:200% 100%;
+  animation:corruptShift 6s linear infinite;
+}
+@keyframes corruptShift{
+  0%{background-position:0% 0;}
+  100%{background-position:200% 0;}
+}
+
+/* ---------- Territories ---------- */
+#territories{
+  max-height:520px;
+  overflow-y:auto;
+  padding-right:4px;
+}
+.territory-card{
+  background:var(--panel-light);
+  border:1px solid var(--border);
+  clip-path:polygon(0 6px,6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px));
+  padding:10px 12px;
+  margin-bottom:10px;
+  font-size:13px;
+}
+.territory-card:last-child{margin-bottom:0;}
+.territory-card .t-name{
+  font-family:'Cinzel', serif;
+  font-size:13px;
+  letter-spacing:0.04em;
+  color:var(--text);
+}
+.territory-card.conquered{
+  border-color:var(--gold);
+  box-shadow:0 0 10px rgba(199,154,71,0.18) inset;
+}
+.territory-card.conquered .t-name{color:var(--gold);}
+.territory-card.locked{
+  opacity:0.55;
+}
+.t-meta{
+  display:flex;
+  justify-content:space-between;
+  color:var(--text-dim);
+  font-size:11px;
+  margin:3px 0 5px;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+}
+.t-desc{
+  color:var(--text-dim);
+  font-size:12px;
+  font-style:italic;
+}
+
+/* ---------- Council / Event ---------- */
+.event-card{
+  border-left:3px solid var(--ember);
+  box-shadow:0 0 22px -6px var(--ember-glow);
+  position:relative;
+}
+.event-card .speaker{
+  font-size:12px;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:var(--ember);
+  margin-bottom:6px;
+}
+.event-card h3{
+  margin:0 0 10px;
+  font-size:20px;
+  letter-spacing:0.05em;
+  color:var(--text);
+}
+.event-text{
+  margin:0 0 16px;
+  color:var(--text);
+}
+.choice-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.choice-btn, .action-btn, .big-btn{
+  font-family:'EB Garamond', serif;
+  font-size:15px;
+  text-align:left;
+  background:var(--panel-light);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:10px 14px;
+  cursor:pointer;
+  clip-path:polygon(0 6px,6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px));
+  transition:border-color .15s, color .15s, transform .1s;
+}
+.choice-btn:hover, .action-btn:hover:not(:disabled), .big-btn:hover{
+  border-color:var(--ember);
+  color:#fff;
+}
+.choice-btn:active, .action-btn:active, .big-btn:active{transform:scale(0.99);}
+.action-btn:disabled{
+  opacity:0.4;
+  cursor:not-allowed;
+}
+.result-text{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px dashed var(--border);
+  color:var(--text);
+  font-style:italic;
+}
+.continue-wrap{margin-top:16px; text-align:right;}
+
+/* ---------- Actions ---------- */
+.actions-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+@media (max-width:480px){
+  .actions-grid{grid-template-columns:1fr;}
+}
+.action-btn small{
+  display:block;
+  color:var(--text-dim);
+  font-size:11px;
+  margin-top:3px;
+  text-transform:none;
+  letter-spacing:0;
+}
+.target-row{
+  display:flex;
+  gap:8px;
+  margin-top:4px;
+  flex-wrap:wrap;
+}
+.target-row select{
+  flex:1;
+  background:var(--bg-deep);
+  color:var(--text);
+  border:1px solid var(--border);
+  padding:8px;
+  font-family:'EB Garamond', serif;
+  font-size:14px;
+}
+.target-row .action-btn{
+  flex:0 0 auto;
+}
+.gate-note{
+  font-size:12px;
+  color:var(--text-dim);
+  font-style:italic;
+  margin-top:6px;
+}
+
+/* ---------- Chronicle ---------- */
+.chronicle{
+  max-height:230px;
+  overflow-y:auto;
+  font-size:13px;
+  color:var(--text-dim);
+}
+.chronicle .entry{
+  padding:6px 0;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.chronicle .entry:last-child{border-bottom:none;}
+.chronicle .entry .turn-mark{
+  color:var(--gold);
+  font-family:'JetBrains Mono', monospace;
+  margin-right:6px;
+}
+
+/* ---------- Overlay ---------- */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(8,6,5,0.92);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:50;
+  padding:24px;
+}
+.overlay.hidden{display:none;}
+.overlay-box{
+  max-width:600px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  clip-path:polygon(0 14px,14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px));
+  padding:28px 30px;
+  box-shadow:0 0 60px -10px var(--ember-glow);
+}
+.overlay-box h2{
+  margin:0 0 4px;
+  font-size:26px;
+  letter-spacing:0.1em;
+  color:var(--gold);
+  border:none;
+  padding:0;
+  text-transform:none;
+}
+.overlay-box .eyebrow{
+  font-size:12px;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:var(--ember);
+  margin-bottom:6px;
+}
+.overlay-box p{margin:14px 0; color:var(--text);}
+.overlay-box .big-btn{
+  margin-top:10px;
+  display:inline-block;
+}
+
+/* ---------- Banner actions / Glossary ---------- */
+.banner-actions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:14px;
+}
+.glossary-btn{
+  font-family:'Cinzel', serif;
+  font-size:12px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  background:var(--panel);
+  border:1px solid var(--border);
+  color:var(--gold);
+  padding:8px 16px;
+  cursor:pointer;
+  clip-path:polygon(0 6px,6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px));
+  transition:border-color .15s, color .15s;
+}
+.glossary-btn:hover{
+  border-color:var(--ember);
+  color:#fff;
+}
+
+.glossary-box{
+  max-width:640px;
+  width:100%;
+  max-height:80vh;
+  display:flex;
+  flex-direction:column;
+}
+.glossary-box h2{
+  margin:0 0 4px;
+  font-size:24px;
+  letter-spacing:0.1em;
+  color:var(--gold);
+  border:none;
+  padding:0;
+  text-transform:none;
+}
+.glossary-search{
+  width:100%;
+  margin:14px 0 12px;
+  background:var(--bg-deep);
+  color:var(--text);
+  border:1px solid var(--border);
+  padding:10px 12px;
+  font-family:'EB Garamond', serif;
+  font-size:15px;
+}
+.glossary-search:focus{
+  outline:none;
+  border-color:var(--ember);
+}
+.glossary-list{
+  overflow-y:auto;
+  flex:1;
+  padding-right:4px;
+}
+.glossary-item{
+  margin-bottom:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.glossary-item:last-child{border-bottom:none;}
+.glossary-term{
+  font-family:'Cinzel', serif;
+  font-size:14px;
+  letter-spacing:0.06em;
+  color:var(--ember);
+  margin-bottom:3px;
+}
+.glossary-def{
+  font-size:14px;
+  color:var(--text);
+}
+.glossary-empty{
+  color:var(--text-dim);
+  font-style:italic;
+  text-align:center;
+  padding:20px 0;
+}
+.glossary-close-row{
+  text-align:right;
+  margin-top:14px;
+}
+
+/* ---------- Quest panel ---------- */
+.quest-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.quest-item{
+  font-size:13px;
+  padding:8px 10px;
+  background:var(--panel-light);
+  border:1px solid var(--border);
+  clip-path:polygon(0 6px,6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px));
+}
+.quest-item .quest-label{
+  display:block;
+  color:var(--text);
+}
+.quest-item.done{
+  border-color:var(--gold);
+}
+.quest-item.done .quest-label{
+  color:var(--text-dim);
+  text-decoration:line-through;
+}
+.quest-item.main{
+  border-left:3px solid var(--ember);
+}
+.quest-item.warning{
+  border-left:3px solid var(--corrupt);
+}
+.quest-item.warning .quest-label{
+  color:var(--text);
+}
+.quest-sub{
+  display:block;
+  margin-top:3px;
+  color:var(--text-dim);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="banner">
+    <h1>Ashes of Vaelmoor</h1>
+    <div class="sub">Turn <span class="turn mono" id="turnNum">1</span> — Reign of the Last Ashveil</div>
+    <div class="banner-actions">
+      <button class="glossary-btn" id="glossaryBtn">Glossary &amp; Word Search</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="panel area-quests">
+      <h2>Your Quests</h2>
+      <div class="quest-list" id="questList"></div>
+    </div>
+
+    <div class="panel area-ledger">
+      <h2>The Ledger</h2>
+      <div class="stat-row"><span class="stat-name">Gold</span><span class="stat-val mono" id="goldVal">0</span></div>
+      <div class="stat-row"><span class="stat-name">Grain</span><span class="stat-val mono" id="grainVal">0</span></div>
+      <div class="stat-row"><span class="stat-name">Soldiers</span><span class="stat-val mono" id="soldiersVal">0</span></div>
+
+      <div class="stat-row"><span class="stat-name">Faith</span><span class="stat-val mono" id="faithVal">0</span></div>
+      <div class="bar-track"><div class="bar-fill faith" id="faithBar" style="width:0%"></div></div>
+
+      <div class="stat-row"><span class="stat-name">Corruption</span><span class="stat-val mono" id="corruptionVal">0</span></div>
+      <div class="bar-track"><div class="bar-fill corruption" id="corruptionBar" style="width:0%"></div></div>
+    </div>
+
+    <div class="panel area-realm">
+      <h2>The Realm</h2>
+      <div id="territories"></div>
+    </div>
+
+    <div class="panel event-card area-event" id="eventCard"></div>
+
+    <div class="panel area-actions" id="actionsPanel" style="display:none;">
+      <h2>The Council Awaits Your Word</h2>
+      <div class="actions-grid" id="actionsGrid"></div>
+    </div>
+
+    <div class="panel area-chronicle">
+      <h2>The Chronicle</h2>
+      <div class="chronicle" id="chronicle"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-box" id="overlayBox"></div>
+</div>
+
+<div class="overlay hidden" id="glossaryOverlay">
+  <div class="overlay-box glossary-box">
+    <h2>Glossary &amp; Word Search</h2>
+    <input type="text" class="glossary-search" id="glossarySearch" placeholder="Search for a word, e.g. 'corruption', 'parley', 'garrison'...">
+    <div class="glossary-list" id="glossaryList"></div>
+    <div class="glossary-close-row">
+      <button class="big-btn" id="glossaryCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================
+   ASHES OF VAELMOOR — data
+   ===================================================== */
+
+const TERRITORY_DATA = [
+  {id:'dunmar', name:'Dunmar Reach', owner:'Hollow Garrison', garrison:8, goldInc:3, grainInc:14,
+   desc:"Once the breadbasket of Vaelmoor, its fields are ploughed by thralls beneath a sky the colour of a bruise."},
+  {id:'greywood', name:'The Greywood', owner:'Bandit Lords', garrison:6, goldInc:5, grainInc:4,
+   desc:"An ancient forest where outlaw kings hold court beneath trees older than the kingdom itself."},
+  {id:'coldspire', name:'Coldspire Pass', owner:'The Free Company', garrison:10, goldInc:9, grainInc:0,
+   desc:"A mountain choke-point held by mercenaries loyal only to coin."},
+  {id:'saltmere', name:'Saltmere Harbor', owner:'The Drowned Fleet', garrison:7, goldInc:12, grainInc:2,
+   desc:"A pirate haven where black-sailed ships ride at anchor in the fog."},
+  {id:'brackenfort', name:'Brackenfort', owner:'Duke Mavros', garrison:12, goldInc:6, grainInc:6,
+   desc:"A grim stone keep, seat of the rival who would call himself king."},
+  {id:'marsh', name:'The Sunken Marsh', owner:'The Marsh-Mothers', garrison:9, goldInc:1, grainInc:0,
+   desc:"A drowned forest where cultists of the Unmaker whisper to things beneath the water."},
+  {id:'emberwastes', name:'The Ember Wastes', owner:'The Hollow King', garrison:22, goldInc:0, grainInc:0,
+   desc:"The ruin of the capital, where the throne still burns with a fire that gives no warmth.", final:true}
+];
+
+const CONQUER_TEXT = {
+  dunmar: "Dunmar Reach's thralls drop their tools as your banners crest the hill — the Hollow garrison's hold over them was thinner than steel.",
+  greywood: "The bandit-lords of the Greywood kneel in the leaf-litter, more pragmatic than proud. By dusk your colors hang from the old watchtowers.",
+  coldspire: "Coin or no coin, the Free Company knows when a contract has ended. Coldspire Pass opens its gates without a single arrow loosed in anger.",
+  saltmere: "The Drowned Fleet's black sails strike their colors one by one. Saltmere Harbor, and its deep-water docks, are yours.",
+  brackenfort: "Brackenfort's walls, the pride of Duke Mavros, fall in a single bloody afternoon. The Duke himself is nowhere to be found.",
+  marsh: "The Marsh-Mothers scatter into the reeds, and the Sunken Marsh falls silent — for the first time in a generation."
+};
+
+const DEFEAT_TEXT = {
+  dunmar: "The Hollow garrison at Dunmar Reach holds, its thrall-soldiers fighting with a hunger that has nothing to do with hunger.",
+  greywood: "The Greywood swallows your column whole — the bandit-lords know every root and hollow of these woods, and you do not.",
+  coldspire: "The Free Company earns their coin today. Coldspire Pass remains a wall of spears and frost.",
+  saltmere: "Saltmere's harbor cannons answer before your men reach the walls. The retreat is orderly, at least.",
+  brackenfort: "Brackenfort's walls do not so much as crack. Duke Mavros's banner still flies, mockingly, at dawn.",
+  marsh: "The Sunken Marsh drinks your soldiers down into the mud and gives nothing back. The Marsh-Mothers do not even bother to gloat.",
+  emberwastes: "The violet fire surges and your line breaks. The Ember Wastes are not yet ready to fall."
+};
+
+const EVENTS = [
+  {
+    speaker:"Lady Vyra Seris, Spymaster",
+    title:"Refugees from Dunmar",
+    text:"Lady Seris finds you at the gate. 'Refugees from Dunmar Reach, my lord. Hollow thralls burned their granary for sport. They beg shelter within Ashveil's walls.'",
+    choices:[
+      {label:"Open the gates to them (+ Faith, − Grain)", run:s=>{ s.faith+=8; s.grain-=10; return "The people remember kindness. Word spreads of a lord who has not forgotten them. (+8 faith, -10 grain)"; }},
+      {label:"We have no grain to spare (− Faith)", run:s=>{ s.faith-=6; return "Seris's jaw tightens. 'As you command,' she says, and does not meet your eyes again that day. (-6 faith)"; }}
+    ]
+  },
+  {
+    speaker:"General Thessa Korrath",
+    title:"The Drillyard",
+    text:"General Korrath's voice carries across the yard before you even arrive. 'Half these recruits couldn't hold a line against a strong wind. Give me leave to drill them till their hands bleed, or we march to slaughter.'",
+    choices:[
+      {label:"Drill them hard (+ Soldiers, − Faith)", run:s=>{ s.soldiers+=3; s.faith-=4; return "Screams and steel ring through the night, and by morning the recruits stand straighter. (+3 soldiers, -4 faith)"; }},
+      {label:"Mercy first, General (+ Faith)", run:s=>{ s.faith+=5; return "Korrath grunts but obeys. The recruits sleep easier — for now. (+5 faith)"; }}
+    ]
+  },
+  {
+    speaker:"???",
+    title:"A Voice in the Hearth-Smoke",
+    text:"That night the hearth-fire burns violet at its heart, and a voice that is not a voice curls from the smoke. 'Little ember-king. So small a flame, to challenge what wears your father's crown. I could make you brighter. Only... borrow a little of what I am.'",
+    choices:[
+      {label:"Take what it offers (+ Gold, + Soldiers, ++ Corruption)", run:s=>{ s.gold+=35; s.soldiers+=6; s.corruption+=18; return "Power floods your veins like cold honey. In the morning your reflection's eyes hold the firelight a heartbeat too long. (+35 gold, +6 soldiers, +18 corruption)"; }},
+      {label:"Cast salt into the flame (+ Faith, − Corruption)", run:s=>{ s.faith+=6; s.corruption-=8; return "The violet light gutters and dies. Brother Ilun, sleepless, nods once from the doorway — as if he felt it too. (+6 faith, -8 corruption)"; }}
+    ]
+  },
+  {
+    speaker:"Brother Ilun, Keeper of Vigils",
+    title:"The Vigil of Ashes",
+    text:"Brother Ilun keeps his nightly vigil over a cracked shard of the Ember Throne he carries everywhere. 'They called it the Unmaker's Bargain. The old king traded the kingdom's name for power undying. Names, my lord, are wards. Do not forget yours.'",
+    choices:[
+      {label:"Pray with him through the night (+ Faith)", run:s=>{ s.faith+=10; return "The vigil candles burn low, but something in the dark recedes a little. (+10 faith)"; }},
+      {label:"There is no time for old stories (− Faith, + Corruption)", run:s=>{ s.faith-=3; s.corruption+=3; return "Ilun says nothing — but he writes something in his small book, and does not show it to you. (-3 faith, +3 corruption)"; }}
+    ]
+  },
+  {
+    speaker:"Lady Vyra Seris, Spymaster",
+    title:"A Defector from Brackenfort",
+    text:"A man in Mavros's colors kneels before you, hands bound by Seris's own rope. 'He says Brackenfort's eastern gate stands unguarded most nights, my lord. For a purse of gold, he'll show us the hour.'",
+    choices:[
+      {label:"Pay him (costs 20 Gold, weakens Brackenfort's garrison)", run:s=>{
+        if(s.gold<20) return "Your coffers are too thin to even consider it. Seris reads your face and quietly sends the man away.";
+        s.gold-=20;
+        const t=s.territories.find(x=>x.id==='brackenfort');
+        t.garrison=Math.max(4,t.garrison-4);
+        return "Gold changes hands. Somewhere, a gate will be left ajar. (-20 gold, Brackenfort's garrison weakened)";
+      }},
+      {label:"Turn him away — a man who sells one lord will sell another (+ Faith)", run:s=>{ s.faith+=2; return "Seris's eyes glint with something like approval as the man is led off in chains. (+2 faith)"; }}
+    ]
+  },
+  {
+    speaker:"General Thessa Korrath",
+    title:"Storm Over Saltmere",
+    text:"Korrath returns from the coast road grinning beneath her scars. 'A storm broke three of the pirate-king's hulls against the rocks last night. Saltmere's walls stand half-manned while they fish their dead from the surf.'",
+    choices:[
+      {label:"Good. We strike while they're weak (weakens Saltmere's garrison)", run:s=>{
+        const t=s.territories.find(x=>x.id==='saltmere');
+        t.garrison=Math.max(2,t.garrison-3);
+        return "Korrath marks the harbor on her map with something close to relish. (Saltmere's garrison weakened)";
+      }},
+      {label:"Even our enemies deserve to grieve their dead (+ Faith)", run:s=>{ s.faith+=4; return "Korrath looks at you a long moment, then simply nods. (+4 faith)"; }}
+    ]
+  },
+  {
+    speaker:"The Marsh-Mothers",
+    title:"The Marsh-Mothers' Offer",
+    text:"A reed-thin woman wades out of the Sunken Marsh under a flag of pale fungus-light. 'The Unmaker's children ask little. Look away from our rites, and the Marsh's spears will not bar your road.' Brother Ilun's hand tightens on his small book.",
+    choices:[
+      {label:"Accept — fewer spears means fewer graves (weakens Marsh garrison, ++ Corruption)", run:s=>{
+        const t=s.territories.find(x=>x.id==='marsh');
+        t.garrison=2; s.corruption+=12;
+        return "The woman smiles with too many teeth and sinks back into the reeds. Ilun does not speak to you that evening. (Marsh's garrison crumbles, +12 corruption)";
+      }},
+      {label:"Refuse. We do not bargain with what wears human faces as masks (+ Faith, strengthens Marsh garrison)", run:s=>{
+        s.faith+=7;
+        const t=s.territories.find(x=>x.id==='marsh');
+        t.garrison+=2;
+        return "The fungus-light gutters out. Somewhere in the marsh, something old takes note of you. (+7 faith, Marsh's garrison strengthens)";
+      }}
+    ]
+  },
+  {
+    speaker:"Lady Vyra Seris, Spymaster",
+    title:"The Granaries Run Thin",
+    text:"Seris lays a ledger before you, ink smudged with too many corrections. 'Grain stores will not last the season at this rate, my lord. We can ration — the people will tighten their belts and grumble. Or we can requisition from the border villages, by force if need be.'",
+    choices:[
+      {label:"Ration (+ Grain, − Faith)", run:s=>{ s.grain+=5; s.faith-=4; return "Belts tighten across Ashveil Hold. The grumbling is quiet, but it is there. (+5 grain, -4 faith)"; }},
+      {label:"Requisition from the villages (++ Grain, −− Faith, + Corruption)", run:s=>{ s.grain+=18; s.faith-=9; s.corruption+=4; return "Carts return laden with grain, and with the silence of villages that watched it taken. (+18 grain, -9 faith, +4 corruption)"; }}
+    ]
+  },
+  {
+    speaker:"General Thessa Korrath",
+    title:"Korrath's Doubt",
+    text:"Korrath catches you alone, voice low. 'The men ask what truly waits in the Ember Wastes. Some have heard... things. Do we tell them the old king became something else, or let them believe it's only a man on a throne?'",
+    choices:[
+      {label:"Tell them the truth (+ Faith, − Corruption)", run:s=>{ s.faith+=5; s.corruption-=3; return "Fear thins the ranks by a few deserters, but those who remain stand straighter, knowing what they march toward. (+5 faith, -3 corruption)"; }},
+      {label:"Let them believe a comforting lie (+ Soldiers, + Corruption)", run:s=>{ s.soldiers+=2; s.corruption+=5; return "Korrath exhales, relieved and ashamed in equal measure. Fewer men slip away in the night. (+2 soldiers, +5 corruption)"; }}
+    ]
+  },
+  {
+    speaker:"Lady Vyra Seris, Spymaster",
+    title:"The Spy in the Kitchens",
+    text:"Seris drags a trembling scullion before you by the collar. 'Hollow gold in his mattress, my lord, and a list of our grain stores in his own hand. Your judgment?'",
+    choices:[
+      {label:"Make an example of him (+ Soldiers, − Faith, + Corruption)", run:s=>{ s.soldiers+=1; s.faith-=5; s.corruption+=6; return "Fear keeps order, for a while. The yard is very quiet afterward. (+1 soldier, -5 faith, +6 corruption)"; }},
+      {label:"Exile him beyond the walls (+ Faith)", run:s=>{ s.faith+=4; return "He is sent out the gate with nothing but the clothes on his back. Mercy, the soldiers murmur, is not weakness after all. (+4 faith)"; }}
+    ]
+  },
+  {
+    speaker:"Brother Ilun, Keeper of Vigils",
+    title:"The Ember Dream",
+    text:"You wake gasping from a dream of a throne built from cooling coals, and a crown that fits like a brand. Brother Ilun, already at your door, says only: 'The closer you draw to the Wastes, the louder it dreams for both of us.'",
+    choices:[
+      {label:"Ask him to teach you the old wards (+ Faith, − Corruption)", run:s=>{ s.faith+=6; s.corruption-=4; return "He teaches you words in a language with no living speakers. They taste like ash and like relief. (+6 faith, -4 corruption)"; }},
+      {label:"Tell him it was only a dream (+ Corruption)", run:s=>{ s.corruption+=5; return "He looks at you for a long moment, then simply bows and leaves. The crown-shaped brand mark on your wrist itches for days. (+5 corruption)"; }}
+    ]
+  },
+  {
+    speaker:"A Herald of Brackenfort",
+    title:"Mavros's Offer",
+    text:"A herald from Brackenfort arrives under a truce-banner. 'Duke Mavros proposes this: leave his walls untouched, and he'll see a tithe of grain sent to Ashveil each season, for as long as neither of you draws first blood.'",
+    choices:[
+      {label:"Accept the tithe (+ Grain, strengthens Brackenfort's garrison)", run:s=>{
+        s.grain+=12;
+        const t=s.territories.find(x=>x.id==='brackenfort');
+        t.garrison+=2;
+        return "Grain carts begin arriving from Brackenfort within the week. Behind his walls, Mavros's masons get back to work. (+12 grain, Brackenfort's garrison strengthens)";
+      }},
+      {label:"Refuse. There is only one crown in Vaelmoor (+ Faith, strengthens Brackenfort's garrison)", run:s=>{
+        s.faith+=2;
+        const t=s.territories.find(x=>x.id==='brackenfort');
+        t.garrison+=2;
+        return "The herald departs stiffly. Behind Brackenfort's walls, war-horns begin to sound. (+2 faith, Brackenfort's garrison strengthens)";
+      }}
+    ]
+  }
+];
+
+const ENDINGS = {
+  dawn:{
+    title:"Dawn Over Vaelmoor",
+    eyebrow:"Victory",
+    text:"The Ember Throne shatters at your blow, and the violet fire that has burned in the capital's heart for ten years finally, truly dies. The husk wearing your father's face crumbles to ash and is carried off on the wind. Brother Ilun says the old wards are already knitting themselves back together — that the land remembers how to heal, when given the chance. Vaelmoor is yours, Kael Ashveil: scarred, hungry, but unburdened. The Ember Throne is cold for the first time in a decade, and for the first time in a decade, that feels like a mercy."
+  },
+  ashking:{
+    title:"A King of Ash and Embers",
+    eyebrow:"Victory",
+    text:"You bring the Hollow King down — but not before something of him passes into you. A coldness behind the eyes. A fire that flickers when you're not watching it. Vaelmoor is yours, and the people cheer, not knowing how close they came to cheering for someone else entirely. Brother Ilun watches you take the throne with an expression you can't quite read. 'The wards held,' he says quietly. 'Mostly.' You sit upon the Ember Throne, and for just a moment, it burns a little brighter than it should."
+  },
+  hollowking:{
+    title:"The New Hollow King",
+    eyebrow:"Victory — at a Price",
+    text:"The Hollow King falls — and rises again, wearing your face. You feel it happen, and by the time you understand what's happening, you no longer mind. The crowds outside Ashveil Hold cheer for their returned prince, and they are not wrong to. He has returned. He simply isn't entirely you anymore. Brother Ilun is the only one who sees it, and he says nothing, because there is nothing left to say. The Ember Throne burns violet once more, and the cycle that broke Vaelmoor a decade ago quietly, patiently, begins again."
+  },
+  hollowcrown:{
+    title:"The Hollow Crown Claims Its Own",
+    eyebrow:"Defeat — Corruption",
+    text:"You stop noticing the violet tint to your shadow sometime around the seventh bargain. By the time General Korrath notices it too, it is already too late to matter — to him, or to anyone else in Ashveil Hold. The kingdom you meant to save becomes, instead, the second thing the Unmaker ever wore. Somewhere, what's left of the real Kael Ashveil watches from very far away, and cannot quite remember why any of this had once seemed to matter."
+  },
+  lastbanner:{
+    title:"The Last Banner Falls",
+    eyebrow:"Defeat — No Army Remains",
+    text:"The last of your soldiers scatter in the night, and by morning Ashveil Hold's yard stands empty but for General Korrath, alone, still polishing a sword no one is left to carry. 'It was a good banner,' she says, to no one. 'Shame about the war.' Whatever remains of your claim to Vaelmoor dissolves quietly into the long list of pretenders the kingdom has already forgotten."
+  },
+  despair:{
+    title:"Despair at Ashveil Hold",
+    eyebrow:"Defeat — Faith Lost",
+    text:"It isn't an army that ends your claim to Vaelmoor — it's silence. One by one, the people of Ashveil Hold stop meeting your eyes, stop answering when called, until even Lady Seris no longer brings you news, because there's no one left who believes it matters. You sit the half-throne of a half-kingdom that has simply, quietly given up on you. The Hollow King, wherever he is, doesn't even need to send an army. He only has to wait."
+  },
+  longwinter:{
+    title:"The Long Winter",
+    eyebrow:"Stalemate",
+    text:"Years pass. Vaelmoor settles into its six warring scraps and one forbidden ruin, and Ashveil Hold becomes simply one border fortress among many — its lord neither victor nor casualty, just another name on a map that stopped changing. Brother Ilun grows old still waiting for the wards to break on their own. They never do. Somewhere in the Ember Wastes, the violet fire burns on, patient as ever, and the kingdom slowly forgets it was ever any other way."
+  }
+};
+
+const INTRO = {
+  title:"Ashes of Vaelmoor",
+  eyebrow:"Ten Years Since the Hollowing",
+  text:"King Aldous Vaelmoor — your father — opened a door that should have stayed shut, and something answered. The court calls it the Hollowing. The smallfolk call it the night the capital's fires turned violet, and never turned back.\n\nYou were smuggled out as a child, one more refugee among thousands. Now you return as Kael Ashveil, last of the bloodline, to a kingdom carved into six warring scraps and one forbidden ruin.\n\nAshveil Hold still stands — barely. General Korrath holds its walls, Lady Seris holds its secrets, and Brother Ilun holds what's left of its faith.\n\nThe throne is still burning. The only question is what you'll do about it — and what it might do to you."
+};
+
+const GLOSSARY = [
+  {term:"Gold", def:"Your treasury. Spent on levying troops, fortifying Ashveil Hold, and parleying with rival territories. Earned through foraging and from the income of territories you control."},
+  {term:"Grain", def:"Your food stores. Every turn your army eats some grain based on how many soldiers you have. If grain runs out, soldiers desert and your Faith drops. Earned through foraging and from farmland territories you control."},
+  {term:"Soldiers", def:"The size of your army. When you March on a territory, you commit 60% of your soldiers to the attack. Soldiers are lost in battle, to starvation, or to Hollow raids — and gained by levying troops or resting."},
+  {term:"Faith", def:"A measure (0-100) of how much your people and soldiers believe in you. Low Faith causes desertions and bad outcomes in events. If Faith reaches 0, your people give up on you entirely and the game ends."},
+  {term:"Corruption", def:"A measure (0-100) of how much the Unmaker's influence has taken root in you. It rises when you make dark or selfish choices, and falls when you choose harder, more principled paths. If it reaches 100, you lose outright. Your Corruption level at the end of the game also decides which victory ending you receive."},
+  {term:"Garrison", def:"The defending strength of a territory. When you March on a territory, your committed soldiers are compared against its garrison — higher garrison means a tougher fight."},
+  {term:"Territory / Province", def:"One of the seven regions of Vaelmoor shown under 'The Realm'. Six are held by rival factions and can be conquered; the seventh, the Ember Wastes, is the final target."},
+  {term:"Conquered", def:"A territory that you have successfully taken, either by March (battle) or Parley (negotiation). Conquered territories add their income to your Gold and Grain every turn."},
+  {term:"March", def:"An action where you attack a chosen territory with your army. You commit 60% of your soldiers; if your attack strength beats the territory's garrison, you conquer it. Either way, you'll likely take casualties."},
+  {term:"Parley", def:"An action where you attempt to negotiate a territory's surrender instead of fighting. Costs Gold and Faith. More likely to succeed against mercenary-minded factions (Bandit Lords, The Free Company, The Drowned Fleet) than against ideologically committed ones."},
+  {term:"Levy Troops", def:"An action that spends 25 Gold to recruit 5 new Soldiers, at the cost of 2 Faith (the harsh training takes a toll)."},
+  {term:"Forage & Trade", def:"An action where your people gather supplies and trade with neighbours, gaining 10 Grain and 4 Gold with no downside."},
+  {term:"Fortify the Hold", def:"An action that spends 15 Gold to reinforce Ashveil Hold's walls, raising Faith by 3."},
+  {term:"Hold Vigil & Rest", def:"An action where your camp rests for a turn, recovering 6 Faith and 2 Soldiers as stragglers return."},
+  {term:"The Ember Wastes", def:"The ruined capital and final territory, seat of the Hollow King. It stays sealed until you have conquered at least 4 of the other 6 territories."},
+  {term:"The Hollow King", def:"What remains of your father, King Aldous Vaelmoor, after the Hollowing — now bound to the Ember Throne in the Ember Wastes."},
+  {term:"The Unmaker", def:"The entity your father bargained with ten years ago, whose influence caused the Hollowing and now tempts you through events and the Corruption stat."},
+  {term:"Ashveil Hold", def:"Your home fortress and seat of power — the one stronghold that never fell."},
+  {term:"Turn", def:"One full round of play: a story event with a choice, followed by one strategic action, followed by upkeep (grain consumption, territory income, and possible Hollow raids)."},
+  {term:"The Chronicle", def:"The scrolling log at the bottom of the screen recording everything that has happened so far, with the turn number it occurred on."},
+  {term:"Hollow Raid", def:"A random event during upkeep that can occur when Corruption is above 50 — Hollow-touched raiders strike Ashveil Hold, costing Soldiers, Gold, and Faith. The higher your Corruption, the more likely this is."},
+  {term:"Ending", def:"The game can conclude in several ways: three victories (Dawn Over Vaelmoor, A King of Ash and Embers, The New Hollow King — determined by your Corruption at the moment of victory), and several defeats (The Hollow Crown Claims Its Own, The Last Banner Falls, Despair at Ashveil Hold, or The Long Winter if 30 turns pass without victory)."}
+];
+
+
+/* =====================================================
+   STATE
+   ===================================================== */
+
+let state;
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function freshState(){
+  return {
+    turn:1,
+    gold:40,
+    grain:35,
+    soldiers:25,
+    faith:60,
+    corruption:8,
+    territories:TERRITORY_DATA.map(t=>({...t, conquered:false})),
+    log:[],
+    eventPool:shuffle(EVENTS.map((_,i)=>i)),
+    currentEvent:null,
+    phase:'event',
+    ended:false
+  };
+}
+
+function clampAll(){
+  state.gold=Math.max(0,Math.round(state.gold));
+  state.grain=Math.max(0,Math.round(state.grain));
+  state.soldiers=Math.max(0,Math.round(state.soldiers));
+  state.faith=Math.max(0,Math.min(100,Math.round(state.faith)));
+  state.corruption=Math.max(0,Math.min(100,Math.round(state.corruption)));
+}
+
+function addLog(text){
+  state.log.unshift({turn:state.turn, text});
+}
+
+/* =====================================================
+   RENDER
+   ===================================================== */
+
+function render(){
+  document.getElementById('turnNum').textContent=state.turn;
+  document.getElementById('goldVal').textContent=state.gold;
+  document.getElementById('grainVal').textContent=state.grain;
+  document.getElementById('soldiersVal').textContent=state.soldiers;
+  document.getElementById('faithVal').textContent=state.faith;
+  document.getElementById('corruptionVal').textContent=state.corruption;
+  document.getElementById('faithBar').style.width=state.faith+'%';
+  document.getElementById('corruptionBar').style.width=state.corruption+'%';
+
+  renderTerritories();
+  renderQuests();
+
+  const eventPanel=document.getElementById('eventCard');
+  const actionsPanel=document.getElementById('actionsPanel');
+
+  if(state.phase==='event'){
+    actionsPanel.style.display='none';
+    renderEvent();
+  } else {
+    renderResolvedEvent();
+    actionsPanel.style.display='block';
+    renderActions();
+  }
+
+  renderChronicle();
+}
+
+function conqueredCount(){
+  return state.territories.filter(t=>t.conquered && !t.final).length;
+}
+
+function renderTerritories(){
+  const el=document.getElementById('territories');
+  const need=4;
+  const unlocked=conqueredCount()>=need;
+  el.innerHTML=state.territories.map(t=>{
+    const cls=['territory-card'];
+    if(t.conquered) cls.push('conquered');
+    if(t.final && !unlocked) cls.push('locked');
+    const status = t.conquered ? 'Held by you' :
+      (t.final && !unlocked) ? `Sealed — needs ${need} provinces broken (${conqueredCount()}/${need})` :
+      `Garrison ${t.garrison}`;
+    return `<div class="${cls.join(' ')}">
+      <div class="t-name">${t.name}</div>
+      <div class="t-meta"><span>${t.owner}</span><span>${status}</span></div>
+      <div class="t-desc">${t.desc}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderQuests(){
+  const el=document.getElementById('questList');
+  const need=4;
+  const cc=conqueredCount();
+  const items=[];
+
+  if(cc<need){
+    const remaining=state.territories.filter(t=>!t.conquered && !t.final);
+    const names=remaining.map(t=>t.name).join(', ');
+    items.push({
+      cls:'main',
+      label:`Break ${need} of the six provinces to shatter the Hollow King's wards over the Ember Wastes`,
+      sub:`Progress: ${cc} / ${need} broken — still standing: ${names}`
+    });
+  } else {
+    const ember=state.territories.find(t=>t.id==='emberwastes');
+    items.push({
+      cls:'main',
+      label:`March on the Ember Wastes and end the Hollow King's reign (garrison ${ember.garrison})`,
+      sub:`The wards are broken — the path to the capital is open.`
+    });
+  }
+
+  state.territories.filter(t=>!t.final).forEach(t=>{
+    items.push({
+      cls: t.conquered ? 'done' : '',
+      label:`Break ${t.name}, held by ${t.owner}`,
+      sub: t.conquered ? 'Held by you' : `March or Parley — garrison ${t.garrison}`
+    });
+  });
+
+  if(state.grain<15){
+    items.push({cls:'warning', label:'Grain is running low — Forage & Trade, or capture farmland.', sub:'Watch your stores'});
+  }
+  if(state.faith<25){
+    items.push({cls:'warning', label:'Faith is faltering — choose events and actions that lift it before it collapses.', sub:'Watch your people'});
+  }
+  if(state.corruption>60){
+    items.push({cls:'warning', label:'Corruption is spreading — dark choices now risk a far darker ending.', sub:'Watch your soul'});
+  }
+  if(state.soldiers<10){
+    items.push({cls:'warning', label:'Your army is thin — Levy Troops or Hold Vigil before marching anywhere.', sub:'Watch your ranks'});
+  }
+
+  el.innerHTML=items.map(q=>`
+    <div class="quest-item ${q.cls}">
+      <span class="quest-label">${q.label}</span>
+      <span class="quest-sub">${q.sub}</span>
+    </div>
+  `).join('');
+}
+
+function renderEvent(){
+  const ev=state.currentEvent;
+  const el=document.getElementById('eventCard');
+  el.innerHTML=`
+    <div class="speaker">${ev.speaker}</div>
+    <h3>${ev.title}</h3>
+    <p class="event-text">${ev.text.replace(/\n/g,'<br><br>')}</p>
+    <div class="choice-list" id="choiceList"></div>
+  `;
+  const list=el.querySelector('#choiceList');
+  ev.choices.forEach((c,i)=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.textContent=c.label;
+    btn.onclick=()=>{
+      const result=c.run(state);
+      clampAll();
+      addLog(`${ev.title}: ${result}`);
+      state.eventResult=result;
+      state.phase='resolved';
+      render();
+    };
+    list.appendChild(btn);
+  });
+}
+
+function renderResolvedEvent(){
+  const ev=state.currentEvent;
+  const el=document.getElementById('eventCard');
+  el.innerHTML=`
+    <div class="speaker">${ev.speaker}</div>
+    <h3>${ev.title}</h3>
+    <p class="event-text">${ev.text.replace(/\n/g,'<br><br>')}</p>
+    <div class="result-text">${state.eventResult}</div>
+  `;
+}
+
+function renderActions(){
+  const el=document.getElementById('actionsGrid');
+
+  const targets=state.territories.filter(t=>{
+    if(t.conquered) return false;
+    if(t.final && conqueredCount()<4) return false;
+    return true;
+  });
+  const options=targets.map(t=>`<option value="${t.id}">${t.name} (garrison ${t.garrison})</option>`).join('');
+  const gateNote = conqueredCount()<4
+    ? `<div class="gate-note">The Ember Wastes remain sealed until 4 other provinces are broken (${conqueredCount()}/4).</div>` : '';
+
+  el.innerHTML=`
+    <button class="action-btn" id="btnLevy">Levy Troops
+      <small>Cost: 25 gold → +5 soldiers, -2 faith</small>
+    </button>
+    <button class="action-btn" id="btnForage">Forage &amp; Trade
+      <small>+10 grain, +4 gold</small>
+    </button>
+    <button class="action-btn" id="btnFortify">Fortify the Hold
+      <small>Cost: 15 gold → +3 faith</small>
+    </button>
+    <button class="action-btn" id="btnRest">Hold Vigil &amp; Rest
+      <small>+6 faith, +2 soldiers</small>
+    </button>
+    <div style="grid-column:1/-1;">
+      <div class="target-row">
+        <select id="targetSelect">${options}</select>
+        <button class="action-btn" id="btnMarch">March</button>
+        <button class="action-btn" id="btnParley">Parley</button>
+      </div>
+      ${gateNote}
+    </div>
+  `;
+
+  document.getElementById('btnLevy').disabled = state.gold<25;
+  document.getElementById('btnFortify').disabled = state.gold<15;
+
+  document.getElementById('btnLevy').onclick=()=>doAction(actionLevy);
+  document.getElementById('btnForage').onclick=()=>doAction(actionForage);
+  document.getElementById('btnFortify').onclick=()=>doAction(actionFortify);
+  document.getElementById('btnRest').onclick=()=>doAction(actionRest);
+
+  document.getElementById('btnMarch').onclick=()=>{
+    const tid=document.getElementById('targetSelect').value;
+    doAction(s=>march(s,tid));
+  };
+  document.getElementById('btnParley').onclick=()=>{
+    const tid=document.getElementById('targetSelect').value;
+    doAction(s=>parley(s,tid));
+  };
+
+  if(targets.length===0){
+    document.getElementById('btnMarch').disabled=true;
+    document.getElementById('btnParley').disabled=true;
+  }
+}
+
+function renderChronicle(){
+  const el=document.getElementById('chronicle');
+  if(state.log.length===0){
+    el.innerHTML=`<div class="entry">The chronicle is empty. History has not yet been written.</div>`;
+    return;
+  }
+  el.innerHTML=state.log.slice(0,40).map(e=>
+    `<div class="entry"><span class="turn-mark">T${e.turn}</span>${e.text}</div>`
+  ).join('');
+}
+
+/* =====================================================
+   ACTIONS
+   ===================================================== */
+
+function actionLevy(s){
+  if(s.gold<25) return {text:"Korrath shakes her head. 'No coin, no swords, my lord. That's how it's always worked.'"};
+  s.gold-=25; s.soldiers+=5; s.faith-=2;
+  return {text:"New levies march into Ashveil Hold's yard, frightened and unready — but they are soldiers now."};
+}
+function actionForage(s){
+  s.grain+=10; s.gold+=4;
+  return {text:"Foraging parties and quiet trade with neighboring hamlets bring in supplies."};
+}
+function actionFortify(s){
+  if(s.gold<15) return {text:"There's not enough coin in the treasury to so much as buy nails, let alone fortify the walls."};
+  s.gold-=15; s.faith+=3;
+  return {text:"Masons reinforce Ashveil Hold's old walls through the night. The garrison sleeps a little easier."};
+}
+function actionRest(s){
+  s.faith+=6; s.soldiers+=2;
+  return {text:"A day of rest. Stragglers and deserters trickle back to the banner, and the camp's mood lightens."};
+}
+
+function march(s,tid){
+  const t=s.territories.find(x=>x.id===tid);
+  const committed=Math.floor(s.soldiers*0.6);
+  if(committed<3){
+    return {text:"General Korrath refuses outright: 'We don't have enough men to march anywhere, my lord. Not yet.'"};
+  }
+  const atk=committed*(0.8+Math.random()*0.4);
+  const def=t.garrison*(0.8+Math.random()*0.4);
+
+  if(atk>def){
+    const losses=Math.round(committed*(def/atk)*0.5);
+    s.soldiers-=losses;
+
+    if(t.final){
+      s.victory=true;
+      return {text:"The Hollow King's wards shatter like cheap glass. Your soldiers pour into the Ember Wastes as the violet fire ahead rears up to meet you."};
+    }
+
+    t.conquered=true; t.garrison=0; s.gold+=15;
+    return {text:`${CONQUER_TEXT[tid]} (-${losses} soldiers, +15 gold)`};
+  } else {
+    const losses=Math.round(committed*0.7);
+    s.soldiers-=losses;
+    s.faith-=5;
+    const floor = t.final ? 15 : 2;
+    t.garrison=Math.max(floor,Math.round(t.garrison-atk*0.3));
+    return {text:`${DEFEAT_TEXT[tid]} (-${losses} soldiers, -5 faith)`};
+  }
+}
+
+function parley(s,tid){
+  const t=s.territories.find(x=>x.id===tid);
+  if(t.final) return {text:"Brother Ilun shakes his head slowly. 'There is no parley with what waits in the Ember Wastes. Only an ending.'"};
+  if(s.gold<15 || s.faith<5) return {text:"Seris spreads her hands. 'We've neither the coin nor the standing to even open talks, my lord.'"};
+  s.gold-=15; s.faith-=5;
+  const friendly=['Bandit Lords','The Free Company','The Drowned Fleet'];
+  const chance=friendly.includes(t.owner)?0.6:0.25;
+  if(Math.random()<chance){
+    t.conquered=true; t.garrison=0;
+    return {text:`Envoys return with banners lowered: ${t.name} bends the knee without a drop of blood spilled.`};
+  } else {
+    t.garrison+=1;
+    return {text:`The talks collapse before they truly begin. ${t.owner} doubles its watch along the border. (-15 gold, -5 faith)`};
+  }
+}
+
+function doAction(fn){
+  const result=fn(state);
+  clampAll();
+  addLog(result.text);
+
+  if(state.victory){
+    showEnding(victoryEnding());
+    return;
+  }
+
+  upkeep();
+
+  const endKey=checkEndings();
+  if(endKey){
+    showEnding(endKey);
+    return;
+  }
+
+  state.turn+=1;
+  if(state.turn>30){
+    showEnding('longwinter');
+    return;
+  }
+
+  drawEvent();
+  state.phase='event';
+  render();
+}
+
+function upkeep(){
+  const consumption=Math.ceil(state.soldiers/6);
+  state.grain-=consumption;
+  if(state.grain<0){
+    const deserters=Math.min(state.soldiers, Math.abs(state.grain)*2);
+    state.soldiers-=deserters;
+    state.faith-=8;
+    state.grain=0;
+    addLog(`Starvation stalks the camp. ${deserters} soldiers slip away into the night.`);
+  }
+
+  state.territories.forEach(t=>{
+    if(t.conquered){
+      state.gold+=t.goldInc;
+      state.grain+=t.grainInc;
+    }
+  });
+
+  if(state.corruption>50){
+    const chance=(state.corruption-50)/100;
+    if(Math.random()<chance){
+      const dmg=3+Math.floor(Math.random()*4);
+      state.soldiers=Math.max(0,state.soldiers-dmg);
+      state.gold=Math.max(0,state.gold-5);
+      state.faith-=4;
+      addLog(`Hollow-touched raiders strike at Ashveil's outer walls in the night. (-${dmg} soldiers, -5 gold, -4 faith)`);
+    }
+  }
+
+  clampAll();
+}
+
+function victoryEnding(){
+  if(state.corruption<35) return 'dawn';
+  if(state.corruption<=65) return 'ashking';
+  return 'hollowking';
+}
+
+function checkEndings(){
+  if(state.corruption>=100) return 'hollowcrown';
+  if(state.soldiers<=0) return 'lastbanner';
+  if(state.faith<=0) return 'despair';
+  return null;
+}
+
+/* =====================================================
+   GAME FLOW
+   ===================================================== */
+
+function drawEvent(){
+  if(state.eventPool.length===0){
+    state.eventPool=shuffle(EVENTS.map((_,i)=>i));
+  }
+  const idx=state.eventPool.pop();
+  state.currentEvent=EVENTS[idx];
+}
+
+function showEnding(key){
+  const ending=ENDINGS[key];
+  const box=document.getElementById('overlayBox');
+  box.innerHTML=`
+    <div class="eyebrow">${ending.eyebrow}</div>
+    <h2>${ending.title}</h2>
+    <p>${ending.text.replace(/\n\n/g,'</p><p>')}</p>
+    <p style="color:var(--text-dim); font-size:14px;">Reached on turn ${state.turn}, with ${state.corruption} corruption and ${conqueredCount()} provinces broken.</p>
+    <button class="big-btn" id="restartBtn">Begin Anew</button>
+  `;
+  document.getElementById('overlay').classList.remove('hidden');
+  document.getElementById('restartBtn').onclick=startGame;
+}
+
+function renderGlossaryList(filter){
+  const el=document.getElementById('glossaryList');
+  const q=filter.trim().toLowerCase();
+  const items=GLOSSARY.filter(g=>!q || g.term.toLowerCase().includes(q) || g.def.toLowerCase().includes(q));
+  if(items.length===0){
+    el.innerHTML=`<div class="glossary-empty">No words found matching "${filter}". Try a shorter search, like "faith" or "march".</div>`;
+    return;
+  }
+  el.innerHTML=items.map(g=>`
+    <div class="glossary-item">
+      <div class="glossary-term">${g.term}</div>
+      <div class="glossary-def">${g.def}</div>
+    </div>
+  `).join('');
+}
+
+function setupGlossary(){
+  const btn=document.getElementById('glossaryBtn');
+  const overlay=document.getElementById('glossaryOverlay');
+  const closeBtn=document.getElementById('glossaryCloseBtn');
+  const search=document.getElementById('glossarySearch');
+
+  btn.onclick=()=>{
+    renderGlossaryList('');
+    search.value='';
+    overlay.classList.remove('hidden');
+    search.focus();
+  };
+  closeBtn.onclick=()=>{
+    overlay.classList.add('hidden');
+  };
+  overlay.onclick=(e)=>{
+    if(e.target===overlay) overlay.classList.add('hidden');
+  };
+  search.oninput=()=>{
+    renderGlossaryList(search.value);
+  };
+}
+
+function showIntro(){
+  const box=document.getElementById('overlayBox');
+  box.innerHTML=`
+    <div class="eyebrow">${INTRO.eyebrow}</div>
+    <h2>${INTRO.title}</h2>
+    <p>${INTRO.text.replace(/\n\n/g,'</p><p>')}</p>
+    <button class="big-btn" id="beginBtn">Take Up the Ember Crown</button>
+  `;
+  document.getElementById('overlay').classList.remove('hidden');
+  document.getElementById('beginBtn').onclick=()=>{
+    document.getElementById('overlay').classList.add('hidden');
+    state=freshState();
+    drawEvent();
+    render();
+  };
+}
+
+function startGame(){
+  document.getElementById('overlay').classList.add('hidden');
+  state=freshState();
+  drawEvent();
+  render();
+}
+
+setupGlossary();
+showIntro();
+</script>
+</body>
+</html>
